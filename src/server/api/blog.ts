@@ -102,10 +102,10 @@ const createPost: RequestHandler = async (req, res, next) => {
       excerpt: z.string().min(1),
       author: z.string().min(1),
       category: z.enum([
-        'Powder Coating Tips',
+        'Powder Coating Tips & Maintenance',
+        'Behind-the-Scenes & Workshop Showcases',
         'Project Spotlights',
-        'Industry News',
-        'Behind the Scenes'
+        'Industry News & Innovations'
       ]),
       imageUrl: z.string().url(),
       featured: z.boolean().optional(),
@@ -152,10 +152,10 @@ const updatePost: RequestHandler<{ id: string }> = async (req, res, next) => {
       excerpt: z.string().min(1).optional(),
       author: z.string().min(1).optional(),
       category: z.enum([
-        'Powder Coating Tips',
+        'Powder Coating Tips & Maintenance',
+        'Behind-the-Scenes & Workshop Showcases',
         'Project Spotlights',
-        'Industry News',
-        'Behind the Scenes'
+        'Industry News & Innovations'
       ]).optional(),
       imageUrl: z.string().url().optional(),
       featured: z.boolean().optional(),

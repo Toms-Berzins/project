@@ -49,7 +49,7 @@ let Quote: mongoose.Model<QuoteDocument>;
 const connectDB = async () => {
   try {
     // Check if we already have a connection
-    if (mongoose.connections.length > 0 && mongoose.connections[0].readyState === 1) {
+    if (mongoose.connection && mongoose.connection.readyState === 1) {
       console.log('MongoDB already connected');
       return;
     }
@@ -57,8 +57,7 @@ const connectDB = async () => {
     // Set strict query and strict mode
     mongoose.set('strictQuery', false);
     
-    const mongoUri = import.meta.env.VITE_MONGODB_URI || 'mongodb://localhost:27017/bolt';
-    const conn = await mongoose.connect(mongoUri);
+    const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/bolt');
     console.log(`MongoDB Connected: ${conn.connection.host}`);
     
     // Initialize models after connection

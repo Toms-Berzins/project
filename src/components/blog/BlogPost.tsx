@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaTiktok, FaInstagram, FaFacebook, FaTwitter } from 'react-icons/fa';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import SocialEmbed from './SocialEmbed';
 
 interface BlogPost {
@@ -11,10 +11,13 @@ interface BlogPost {
   date: string;
   category: string;
   imageUrl: string;
+  slug: string;
+  excerpt: string;
   socialMedia?: {
     tiktokEmbed?: string;
     instagramEmbed?: string;
   };
+  relatedPosts?: BlogPost[];
 }
 
 export default function BlogPost() {
@@ -110,15 +113,49 @@ export default function BlogPost() {
           {post.category} • {new Date(post.date).toLocaleDateString()} • By {post.author}
         </div>
         <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
-        <img
+        <motion.img
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           src={post.imageUrl}
           alt={post.title}
-          className="w-full h-96 object-cover rounded-lg shadow-lg"
+          className="w-full h-[500px] object-cover rounded-lg shadow-lg"
         />
       </header>
 
-      {/* Social Share Buttons */}
-      <div className="flex gap-4 mb-8">
+      {/* Sticky Social Share Sidebar */}
+      <div className="hidden lg:flex flex-col fixed left-8 top-1/2 transform -translate-y-1/2 gap-4">
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          onClick={() => handleShare('tiktok')}
+          className="p-3 rounded-full bg-black text-white shadow-lg"
+        >
+          <FaTiktok size={24} />
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          onClick={() => handleShare('instagram')}
+          className="p-3 rounded-full bg-gradient-to-br from-purple-600 to-pink-500 text-white shadow-lg"
+        >
+          <FaInstagram size={24} />
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          onClick={() => handleShare('facebook')}
+          className="p-3 rounded-full bg-blue-600 text-white shadow-lg"
+        >
+          <FaFacebook size={24} />
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          onClick={() => handleShare('twitter')}
+          className="p-3 rounded-full bg-blue-400 text-white shadow-lg"
+        >
+          <FaTwitter size={24} />
+        </motion.button>
+      </div>
+
+      {/* Mobile Social Share */}
+      <div className="flex lg:hidden gap-4 mb-8 justify-center">
         <motion.button
           whileHover={{ scale: 1.1 }}
           onClick={() => handleShare('tiktok')}
@@ -156,44 +193,92 @@ export default function BlogPost() {
       {post.socialMedia && (post.socialMedia.tiktokEmbed || post.socialMedia.instagramEmbed) && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
           {post.socialMedia.tiktokEmbed && (
-            <SocialEmbed
-              platform="tiktok"
-              embedCode={post.socialMedia.tiktokEmbed}
-              className="aspect-video"
-            />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <SocialEmbed
+                platform="tiktok"
+                embedCode={post.socialMedia.tiktokEmbed}
+                className="aspect-video"
+              />
+            </motion.div>
           )}
           {post.socialMedia.instagramEmbed && (
-            <SocialEmbed
-              platform="instagram"
-              embedCode={post.socialMedia.instagramEmbed}
-              className="aspect-square"
-            />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <SocialEmbed
+                platform="instagram"
+                embedCode={post.socialMedia.instagramEmbed}
+                className="aspect-square"
+              />
+            </motion.div>
           )}
         </div>
       )}
 
-      {/* Call to Action */}
+      {/* Enhanced Call to Action */}
       <motion.div
         whileHover={{ scale: 1.02 }}
-        className="bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg p-8 text-center"
+        className="bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg p-8 text-center mb-12"
       >
-        <h2 className="text-2xl font-bold mb-4">Ready to Transform Your Project?</h2>
-        <p className="mb-6">Get a custom quote for your powder coating needs today!</p>
-        <div className="flex gap-4 justify-center">
+        <h2 className="text-3xl font-bold mb-4">Transform Your Project Today!</h2>
+        <p className="text-lg mb-6">Experience the durability and beauty of professional powder coating.</p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <a
             href="/quote"
-            className="px-6 py-3 bg-white text-primary-600 rounded-full font-semibold hover:bg-gray-100 transition-colors"
+            className="w-full sm:w-auto px-8 py-4 bg-white text-primary-600 rounded-full font-semibold hover:bg-gray-100 transition-colors text-lg"
           >
-            Request a Quote
+            Get Your Free Quote
           </a>
           <a
-            href="/portfolio"
-            className="px-6 py-3 border-2 border-white text-white rounded-full font-semibold hover:bg-white hover:text-primary-600 transition-colors"
+            href="https://www.tiktok.com/@yourhandle"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full sm:w-auto px-8 py-4 border-2 border-white text-white rounded-full font-semibold hover:bg-white hover:text-primary-600 transition-colors text-lg flex items-center justify-center gap-2"
           >
-            View Portfolio
+            <FaTiktok /> Follow on TikTok
           </a>
         </div>
       </motion.div>
+
+      {/* Related Posts */}
+      {post.relatedPosts && post.relatedPosts.length > 0 && (
+        <section className="mb-12">
+          <h2 className="text-3xl font-bold mb-8">Related Articles</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {post.relatedPosts.map((relatedPost) => (
+              <motion.div
+                key={relatedPost.title}
+                whileHover={{ y: -5 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+              >
+                <Link
+                  to={`/blog/${relatedPost.slug}`}
+                  className="block bg-white rounded-lg shadow-md overflow-hidden h-full"
+                >
+                  <img
+                    src={relatedPost.imageUrl}
+                    alt={relatedPost.title}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="p-6">
+                    <span className="text-sm text-primary-600">{relatedPost.category}</span>
+                    <h3 className="text-xl font-semibold mt-2 mb-3">{relatedPost.title}</h3>
+                    <p className="text-gray-600 line-clamp-2">{relatedPost.excerpt}</p>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+      )}
     </article>
   );
 } 

@@ -28,22 +28,22 @@ export interface BlogPostDocument extends Document {
 
 const blogPostSchema = new mongoose.Schema({
   title: { type: String, required: true },
-  slug: { type: String, required: true, unique: true },
   content: { type: String, required: true },
   excerpt: { type: String, required: true },
   author: { type: String, required: true },
-  date: { type: Date, required: true },
-  category: {
-    type: String,
+  date: { type: Date, default: Date.now },
+  category: { 
+    type: String, 
     required: true,
     enum: [
-      'Powder Coating Tips',
+      'Powder Coating Tips & Maintenance',
+      'Behind-the-Scenes & Workshop Showcases',
       'Project Spotlights',
-      'Industry News',
-      'Behind the Scenes'
+      'Industry News & Innovations'
     ]
   },
   imageUrl: { type: String, required: true },
+  slug: { type: String, required: true, unique: true },
   featured: { type: Boolean, default: false },
   tags: [String],
   socialMedia: {
@@ -61,8 +61,7 @@ const blogPostSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Add indexes
-blogPostSchema.index({ slug: 1 });
+// Add indexes only once
 blogPostSchema.index({ category: 1 });
 blogPostSchema.index({ date: -1 });
 blogPostSchema.index({ featured: 1 });

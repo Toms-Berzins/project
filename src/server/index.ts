@@ -33,9 +33,45 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/powder_coating_quotes')
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('MongoDB connection error:', err));
+mongoose.connect(process.env.MONGODB_URI || '', {
+  serverSelectionTimeoutMS: 10000,
+  socketTimeoutMS: 45000,
+  retryWrites: true,
+  w: 'majority',
+})
+.then(() => {
+  console.log('Connected to MongoDB Atlas');
+})
+.catch(err => {
+  console.error('MongoDB connection error:', err);
+  if (err.name === 'MongoServerError' && err.code === 8000) {
+    console.error('Authentication failed - please check your MongoDB Atlas credentials');
+  }
+  process.exit(1); // Exit if we can't connect to the database
+});
+
+// Add connection event handlers
+mongoose.connection.on('error', err => {
+  console.error('MongoDB connection error:', err);
+  if (err.name === 'MongoServerError' && err.code === 8000) {
+    console.error('Authentication failed - please check your MongoDB Atlas credentials');
+  }
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('MongoDB disconnected - attempting to reconnect...');
+});
+
+mongoose.connection.on('reconnected', () => {
+  console.log('MongoDB reconnected successfully');
+});
+
+mongoose.connection.on('connected', () => {
+  console.log('MongoDB connected successfully');
+});
+
+// Enable debug mode for Mongoose (comment out in production)
+// mongoose.set('debug', true);
 
 interface UserDocument extends Document {
   _id: string;
@@ -345,7 +381,7 @@ app.get('/api/test-db', async (_req: Request, res: Response) => {
   }
 });
 
-// API Routes
+// Mount blog routes
 app.use('/api/blog', blogRoutes);
 
 // Error handling middleware
