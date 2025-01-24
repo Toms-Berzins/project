@@ -166,6 +166,9 @@ passport.use(new FacebookStrategy({
   }
 ));
 
+// Mount blog routes
+app.use('/api/blog', blogRoutes);
+
 // Auth Routes
 app.get('/api/auth/google',
   passport.authenticate('google', { scope: ['profile', 'email'] })
@@ -380,9 +383,6 @@ app.get('/api/test-db', async (_req: Request, res: Response) => {
     res.status(500).json({ error: 'Database connection test failed' });
   }
 });
-
-// Mount blog routes
-app.use('/api/blog', blogRoutes);
 
 // Error handling middleware
 app.use((err: Error, _req: express.Request, res: express.Response) => {

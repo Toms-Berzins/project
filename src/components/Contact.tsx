@@ -1,4 +1,4 @@
-import { Phone, Mail, MapPin, Clock, MessageSquare, Check, MessageCircle, Map, Navigation } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, MessageSquare, Check, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import './Contact.css';
@@ -191,24 +191,12 @@ export default function Contact() {
                       <br />
                       City, State 12345
                     </p>
-                    <div className="mt-2 flex gap-3">
-                      <button
-                        onClick={handleGetDirections}
-                        className="text-accent hover:text-accent/80 font-medium inline-flex items-center"
-                      >
-                        <Map className="w-4 h-4 mr-1" />
-                        Get Directions
-                      </button>
-                      <a
-                        href="https://waze.com/ul?ll=40.713129,-74.003694&navigate=yes"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-accent hover:text-accent/80 font-medium inline-flex items-center"
-                      >
-                        <Navigation className="w-4 h-4 mr-1" />
-                        Open in Waze
-                      </a>
-                    </div>
+                    <button
+                      onClick={handleGetDirections}
+                      className="mt-2 text-accent hover:text-accent/80 font-medium"
+                    >
+                      Get Directions →
+                    </button>
                   </div>
                 </div>
 
@@ -266,7 +254,6 @@ export default function Contact() {
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3024.2219901290355!2d-74.00369368400567!3d40.71312937933185!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25a23e28c1191%3A0x49f75d3281df052a!2s150%20Park%20Row%2C%20New%20York%2C%20NY%2010007!5e0!3m2!1sen!2sus!4v1644262070010!5m2!1sen!2sus"
                 className="w-full h-[300px] rounded-lg"
                 allowFullScreen
-                sandbox="allow-scripts allow-same-origin allow-popups"
               />
             </div>
           </div>
