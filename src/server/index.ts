@@ -322,6 +322,28 @@ app.post('/api/quotes', authenticateToken, async (req: Request, res: Response) =
   }
 });
 
+// Test endpoint for database connection
+app.get('/api/test-db', async (req: Request, res: Response) => {
+  try {
+    // Try to get the connection status
+    const dbState = mongoose.connection.readyState;
+    const status = {
+      0: "disconnected",
+      1: "connected",
+      2: "connecting",
+      3: "disconnecting"
+    };
+    
+    res.json({ 
+      status: status[dbState as keyof typeof status],
+      message: 'Database connection test successful'
+    });
+  } catch (error) {
+    console.error('Database test error:', error);
+    res.status(500).json({ error: 'Database connection test failed' });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
