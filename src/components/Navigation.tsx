@@ -31,121 +31,90 @@ export default function Navigation() {
   ];
 
   return (
-    <>
-      <nav className="fixed w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm z-50 border-b border-gray-200 dark:border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link to="/" className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-[#2D3748] to-[#4A5568] rounded-lg"></div>
-                <span className="text-xl font-bold text-gray-900 dark:text-white">PowderPro</span>
-              </Link>
-            </div>
-
-            <div className="hidden md:flex items-center space-x-8">
-              {navItems.map((item) => (
-                item.to.startsWith('/#') ? (
-                  <button
-                    key={item.name}
-                    onClick={() => handleNavigation(item.to)}
-                    className="text-gray-700 dark:text-gray-300 hover:text-[#ED8936] dark:hover:text-[#ED8936] transition-colors"
-                  >
-                    {item.name}
-                  </button>
-                ) : (
-                  <Link
-                    key={item.name}
-                    to={item.to}
-                    className="text-gray-700 dark:text-gray-300 hover:text-[#ED8936] dark:hover:text-[#ED8936] transition-colors"
-                  >
-                    {item.name}
-                  </Link>
-                )
-              ))}
-              <ThemeToggle />
-              <Link
-                to="/quote"
-                className="bg-[#ED8936] text-white px-4 py-2 rounded-lg hover:bg-[#DD7926] transition-colors"
-              >
-                Get Quote
-              </Link>
-            </div>
-
-            <div className="md:hidden flex items-center space-x-4">
-              <ThemeToggle />
-              <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="text-gray-700 dark:text-gray-300"
-                aria-label="Toggle menu"
-              >
-                {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile menu */}
-        {isOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-white dark:bg-gray-900">
-              {navItems.map((item) => (
-                item.to.startsWith('/#') ? (
-                  <button
-                    key={item.name}
-                    onClick={() => handleNavigation(item.to)}
-                    className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-[#ED8936] dark:hover:text-[#ED8936] transition-colors"
-                  >
-                    {item.name}
-                  </button>
-                ) : (
-                  <Link
-                    key={item.name}
-                    to={item.to}
-                    className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-[#ED8936] dark:hover:text-[#ED8936] transition-colors"
-                  >
-                    {item.name}
-                  </Link>
-                )
-              ))}
-              <Link
-                to="/quote"
-                className="block px-3 py-2 bg-[#ED8936] text-white rounded-lg hover:bg-[#DD7926] transition-colors mt-2"
-              >
-                Get Quote
-              </Link>
-            </div>
-          </div>
-        )}
-      </nav>
-
-      {/* Footer */}
-      <footer className="bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center space-x-2 mb-4 md:mb-0">
+    <nav className="fixed w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm z-50 border-b border-gray-200 dark:border-gray-800">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex items-center">
+            <Link to="/" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-gradient-to-br from-[#2D3748] to-[#4A5568] rounded-lg"></div>
               <span className="text-xl font-bold text-gray-900 dark:text-white">PowderPro</span>
-            </div>
-            <div className="flex flex-wrap justify-center space-x-6">
-              <Link
-                to="/privacy-policy"
-                className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-              >
-                Privacy Policy
-              </Link>
-              <Link
-                to="/terms-of-service"
-                className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-              >
-                Terms of Service
-              </Link>
-            </div>
+            </Link>
           </div>
-          <div className="mt-4 text-center text-gray-500 dark:text-gray-400">
-            © {new Date().getFullYear()} PowderPro. All rights reserved.
+
+          <div className="hidden md:flex items-center space-x-8">
+            {navItems.map((item) => (
+              item.to.startsWith('/#') ? (
+                <button
+                  key={item.name}
+                  onClick={() => handleNavigation(item.to)}
+                  className="text-gray-700 dark:text-gray-300 hover:text-[#ED8936] dark:hover:text-[#ED8936] transition-colors"
+                >
+                  {item.name}
+                </button>
+              ) : (
+                <Link
+                  key={item.name}
+                  to={item.to}
+                  className="text-gray-700 dark:text-gray-300 hover:text-[#ED8936] dark:hover:text-[#ED8936] transition-colors"
+                >
+                  {item.name}
+                </Link>
+              )
+            ))}
+            <ThemeToggle />
+            <Link
+              to="/quote"
+              className="bg-[#ED8936] text-white px-4 py-2 rounded-lg hover:bg-[#DD7926] transition-colors"
+            >
+              Get Quote
+            </Link>
+          </div>
+
+          <div className="md:hidden flex items-center space-x-4">
+            <ThemeToggle />
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="text-gray-700 dark:text-gray-300"
+              aria-label="Toggle menu"
+            >
+              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
           </div>
         </div>
-      </footer>
-    </>
+      </div>
+
+      {/* Mobile menu */}
+      {isOpen && (
+        <div className="md:hidden">
+          <div className="px-2 pt-2 pb-3 space-y-1 bg-white dark:bg-gray-900">
+            {navItems.map((item) => (
+              item.to.startsWith('/#') ? (
+                <button
+                  key={item.name}
+                  onClick={() => handleNavigation(item.to)}
+                  className="block w-full text-left px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-[#ED8936] dark:hover:text-[#ED8936] transition-colors"
+                >
+                  {item.name}
+                </button>
+              ) : (
+                <Link
+                  key={item.name}
+                  to={item.to}
+                  className="block px-3 py-2 text-gray-700 dark:text-gray-300 hover:text-[#ED8936] dark:hover:text-[#ED8936] transition-colors"
+                >
+                  {item.name}
+                </Link>
+              )
+            ))}
+            <Link
+              to="/quote"
+              className="block px-3 py-2 bg-[#ED8936] text-white rounded-lg hover:bg-[#DD7926] transition-colors mt-2"
+            >
+              Get Quote
+            </Link>
+          </div>
+        </div>
+      )}
+    </nav>
   );
 }

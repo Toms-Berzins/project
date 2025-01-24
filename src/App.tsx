@@ -1,5 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import Navigation from './components/Navigation';
+import Footer from './components/Footer';
 import Hero from './components/Hero';
 import Services from './components/Services';
 import Portfolio from './components/Portfolio';
@@ -27,6 +29,7 @@ function App() {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
       <Navigation />
+      <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
       <main className="flex-grow">
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -36,6 +39,7 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
+      <Footer />
     </div>
   );
 }

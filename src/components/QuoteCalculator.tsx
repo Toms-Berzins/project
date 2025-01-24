@@ -207,6 +207,38 @@ export default function QuoteCalculator() {
     }
   };
 
+  const handleSocialLogin = async (provider: 'google' | 'facebook') => {
+    try {
+      // Open the OAuth provider's login page in a new window
+      const width = 500;
+      const height = 600;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2;
+      
+      window.open(
+        `${API_URL}/api/auth/${provider}`,
+        `${provider}Login`,
+        `width=${width},height=${height},left=${left},top=${top}`
+      );
+
+      // Listen for the OAuth callback message
+      const handleMessage = async (event: MessageEvent) => {
+        if (event.origin !== API_URL) return;
+        
+        if (event.data.type === 'social-login-success') {
+          window.removeEventListener('message', handleMessage);
+          setUserId(event.data.user._id);
+          setShowLoginModal(false);
+          setErrorMessage(null);
+        }
+      };
+
+      window.addEventListener('message', handleMessage);
+    } catch (error) {
+      setErrorMessage(createErrorMessage(error));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -302,8 +334,11 @@ export default function QuoteCalculator() {
         <LoginModal
           onLogin={handleLogin}
           onSignup={handleSignup}
+          onSocialLogin={handleSocialLogin}
           onClose={() => setShowLoginModal(false)}
           error={errorMessage}
+          prefillName={formData.contact.name}
+          prefillEmail={formData.contact.email}
         />
       )}
       

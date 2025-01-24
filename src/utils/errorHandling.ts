@@ -22,6 +22,12 @@ export const handleError = (error: unknown): AppError => {
 };
 
 export const createErrorMessage = (error: unknown): string => {
-  const appError = handleError(error);
-  return appError.message;
+  if (error instanceof Error) {
+    // Handle MongoDB duplicate key error
+    if (error.message.includes('E11000 duplicate key error')) {
+      return 'An account with this email already exists. Please login instead.';
+    }
+    return error.message;
+  }
+  return 'An unexpected error occurred';
 }; 

@@ -17,22 +17,13 @@ export default function Hero() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center">
-      <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-black/30 z-10"></div>
-        <img
-          src="https://images.unsplash.com/photo-1565034946487-077786996e27?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80"
-          alt="Industrial powder coating facility"
-          className="w-full h-full object-cover"
-        />
-      </div>
-      
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
+    <div className="relative min-h-screen flex items-center bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
         <div className="max-w-xl">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 animate-fade-in">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 animate-fade-in">
             Premium Powder Coating Solutions
           </h1>
-          <p className="text-xl text-gray-200 mb-8">
+          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
             Transform your metal surfaces with our professional powder coating services. 
             Durable, beautiful, and environmentally friendly.
           </p>
@@ -47,7 +38,7 @@ export default function Hero() {
             </Link>
             <button
               onClick={handlePortfolioClick}
-              className="inline-flex items-center justify-center px-6 py-3 border border-white text-base font-medium rounded-lg text-white hover:bg-white/10 transition-colors"
+              className="inline-flex items-center justify-center px-6 py-3 border border-gray-900 dark:border-white text-base font-medium rounded-lg text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
             >
               View Portfolio
             </button>
