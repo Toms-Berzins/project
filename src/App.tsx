@@ -1,20 +1,15 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Navigation from './components/Navigation';
 import Footer from './components/Footer';
 import Hero from './components/Hero';
 import Services from './components/Services';
 import Portfolio from './components/Portfolio';
-import QuoteCalculator from './components/QuoteCalculator';
 import Contact from './components/Contact';
 import Testimonials from './components/Testimonials';
 import FAQ from './components/FAQ';
-import PrivacyPolicy from './components/legal/PrivacyPolicy';
-import TermsOfService from './components/legal/TermsOfService';
-import Blog from './components/blog/Blog';
-import BlogPost from './components/blog/BlogPost';
 
-function HomePage() {
+export function HomePage() {
   return (
     <>
       <Hero />
@@ -33,19 +28,12 @@ function App() {
       <Navigation />
       <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
       <main className="flex-grow">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/quote" element={<QuoteCalculator />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/blog/:slug" element={<BlogPost />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/terms-of-service" element={<TermsOfService />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <Outlet />
       </main>
       <Footer />
     </div>
   );
 }
 
+App.HomePage = HomePage;
 export default App;

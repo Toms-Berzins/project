@@ -1,119 +1,137 @@
-import mongoose from 'mongoose';
 import { FormData, PriceBreakdown } from '../components/quote/types';
 
-const API_URL = "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
-interface UserDocument extends mongoose.Document {
+interface QuoteData {
+  userId: string;
+  formData: {
+    material: string;
+    dimensions: {
+      length: string;
+      width: string;
+      height: string;
+      unit: "inches" | "cm";
+    };
+    coating: {
+      type: string;
+      finish: string;
+    };
+    color: {
+      type: string;
+      custom?: string;
+    };
+    quantity: string;
+    addons: string[];
+    specialRequirements?: string;
+    contact: {
+      name: string;
+      email: string;
+      phone?: string;
+      company?: string;
+    };
+  };
+  priceBreakdown: {
+    base: number;
+    coating: number;
+    finish: number;
+    volume: number;
+    addons: number;
+    total: number;
+  };
+  quoteReference: string;
+}
+
+interface UserData {
   email: string;
-  password?: string;
   name: string;
+  password?: string;
   googleId?: string;
   facebookId?: string;
   picture?: string;
-  createdAt: Date;
 }
-
-interface QuoteDocument extends mongoose.Document {
-  userId: mongoose.Types.ObjectId;
-  formData: FormData;
-  priceBreakdown: PriceBreakdown;
-  quoteReference: string;
-  createdAt: Date;
-}
-
-// User Schema
-const userSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
-  password: { type: String },
-  name: { type: String, required: true },
-  googleId: { type: String },
-  facebookId: { type: String },
-  picture: { type: String },
-  createdAt: { type: Date, default: Date.now }
-});
-
-// Quote Schema
-const quoteSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  formData: { type: Object, required: true },
-  priceBreakdown: { type: Object, required: true },
-  quoteReference: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now }
-});
-
-// Initialize models
-let User: mongoose.Model<UserDocument>;
-let Quote: mongoose.Model<QuoteDocument>;
-
-// Database connection
-const connectDB = async () => {
-  try {
-    // Check if we already have a connection
-    if (mongoose.connection && mongoose.connection.readyState === 1) {
-      console.log('MongoDB already connected');
-      return;
-    }
-    
-    // Set strict query and strict mode
-    mongoose.set('strictQuery', false);
-    
-    const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/bolt');
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
-    
-    // Initialize models after connection
-    try {
-      User = mongoose.models.User || mongoose.model<UserDocument>('User', userSchema);
-      Quote = mongoose.models.Quote || mongoose.model<QuoteDocument>('Quote', quoteSchema);
-    } catch (error) {
-      console.error('Model initialization error:', error);
-      User = mongoose.model<UserDocument>('User', userSchema);
-      Quote = mongoose.model<QuoteDocument>('Quote', quoteSchema);
-    }
-  } catch (error) {
-    console.error('Error connecting to MongoDB:', error);
-    throw new Error('Failed to connect to MongoDB');
-  }
-};
-
-// Connect to database immediately
-connectDB().catch(console.error);
-
-export { User, Quote };
 
 // Database service functions
-export const createQuote = async (quoteData: Partial<QuoteDocument>) => {
-  await connectDB();
-  const quote = new Quote(quoteData);
-  return await quote.save();
+export const createQuote = async (quoteData: QuoteData) => {
+  const response = await fetch(`${API_URL}/api/quotes`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(quoteData),
+    credentials: 'include'
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to create quote');
+  }
+  
+  return await response.json();
 };
 
 export const getQuoteByReference = async (reference: string) => {
-  await connectDB();
-  return await Quote.findOne({ quoteReference: reference });
+  const response = await fetch(`${API_URL}/api/quotes/${reference}`, {
+    credentials: 'include'
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch quote');
+  }
+  
+  return await response.json();
 };
 
 export const getUserQuotes = async (userId: string) => {
-  await connectDB();
-  return await Quote.find({ userId }).sort({ createdAt: -1 });
+  const response = await fetch(`${API_URL}/api/quotes/user/${userId}`, {
+    credentials: 'include'
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch user quotes');
+  }
+  
+  return await response.json();
 };
 
-export const createUser = async (userData: Partial<UserDocument>) => {
-  await connectDB();
-  const user = new User(userData);
-  return await user.save();
+export const createUser = async (userData: UserData) => {
+  const response = await fetch(`${API_URL}/api/users`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(userData),
+    credentials: 'include'
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to create user');
+  }
+  
+  return await response.json();
 };
 
 export const findUserByEmail = async (email: string) => {
-  await connectDB();
-  return await User.findOne({ email });
+  const response = await fetch(`${API_URL}/api/users/email/${email}`, {
+    credentials: 'include'
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch user');
+  }
+  
+  return await response.json();
 };
 
 export const findUserById = async (id: string) => {
-  await connectDB();
-  return await User.findById(id);
+  const response = await fetch(`${API_URL}/api/users/${id}`, {
+    credentials: 'include'
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch user');
+  }
+  
+  return await response.json();
 };
-
-export { API_URL };
 
 export const saveQuote = async (
   userId: string,
@@ -123,12 +141,23 @@ export const saveQuote = async (
   const reference = generateQuoteReference();
   
   return await createQuote({
-    userId: new mongoose.Types.ObjectId(userId),
+    userId,
     formData: {
       material: formData.material,
-      dimensions: formData.dimensions,
-      coating: formData.coating,
-      color: formData.color,
+      dimensions: {
+        length: formData.dimensions.length,
+        width: formData.dimensions.width,
+        height: formData.dimensions.height,
+        unit: formData.dimensions.unit,
+      },
+      coating: {
+        type: formData.coating.type,
+        finish: formData.coating.finish,
+      },
+      color: {
+        type: formData.color.type,
+        custom: formData.color.custom,
+      },
       quantity: formData.quantity.toString(),
       addons: formData.addons,
       specialRequirements: formData.specialRequirements,
@@ -146,19 +175,12 @@ export const saveQuote = async (
   });
 };
 
-export const updateQuoteStatus = async (reference: string, status: 'APPROVED' | 'REJECTED' | 'PAID') => {
-  await connectDB();
-  return await Quote.findOneAndUpdate(
-    { quoteReference: reference },
-    { status },
-    { new: true }
-  );
-};
-
 // Helper function to generate a unique quote reference
 const generateQuoteReference = () => {
   const prefix = 'QT';
   const timestamp = Date.now().toString(36).toUpperCase();
   const random = Math.random().toString(36).substring(2, 5).toUpperCase();
   return `${prefix}-${timestamp}-${random}`;
-}; 
+};
+
+export { API_URL }; 

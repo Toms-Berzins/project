@@ -14,11 +14,11 @@ interface Project {
 const projects: Project[] = [
   {
     id: 1,
-    title: 'Vintage Car Restoration',
+    title: 'Classic Car Rim Restoration',
     category: 'Automotive',
     beforeImage: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&q=80',
     afterImage: 'https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&q=80',
-    description: 'Complete restoration of a classic car with custom powder coating finish.'
+    description: 'Vintage wheel restoration with custom powder coating finish. Transformed oxidized rims to showroom quality.'
   },
   {
     id: 2,

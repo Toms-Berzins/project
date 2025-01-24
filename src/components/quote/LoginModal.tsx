@@ -59,6 +59,7 @@ export const LoginModal = ({ onLogin, onSignup, onSocialLogin, onClose, error, p
             </svg>
             Continue with Google
           </button>
+          <p className="text-xs text-gray-500 mt-2">Note: If you experience issues logging in with Google, you may need to temporarily disable Grammarly.</p>
           
           <button
             type="button"

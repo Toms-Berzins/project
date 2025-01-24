@@ -53,8 +53,8 @@ const Portfolio: React.FC = () => {
   const projects: Project[] = [
     {
       id: '1',
-      title: 'Custom Automotive Rims',
-      description: 'Complete wheel restoration with metallic powder coating',
+      title: 'Custom Car Rims',
+      description: 'Professional powder coating for car rims and wheels. Complete wheel restoration with premium metallic finish, including surface preparation, sandblasting, and multi-layer coating for maximum durability.',
       category: 'Automotive',
       finishType: 'Metallic',
       color: 'Gunmetal Gray',
@@ -63,10 +63,10 @@ const Portfolio: React.FC = () => {
       clientType: 'Automotive Enthusiast',
       material: 'Aluminum Alloy',
       duration: '3 days',
-      specialTechniques: ['Surface preparation', 'Multi-layer coating'],
+      specialTechniques: ['Surface preparation', 'Multi-layer coating', 'Wheel restoration', 'Sandblasting'],
       testimonial: {
         author: 'John D.',
-        text: 'Exceptional finish quality. My rims look better than new!',
+        text: 'Exceptional finish quality. My rims look better than new! The attention to detail in the restoration process was impressive.',
         rating: 5
       },
       videoUrl: '/videos/rim-coating-process.mp4'
