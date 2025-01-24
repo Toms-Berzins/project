@@ -7,6 +7,8 @@ import QuoteCalculator from './components/QuoteCalculator';
 import Contact from './components/Contact';
 import Testimonials from './components/Testimonials';
 import FAQ from './components/FAQ';
+import PrivacyPolicy from './components/legal/PrivacyPolicy';
+import TermsOfService from './components/legal/TermsOfService';
 
 function HomePage() {
   return (
@@ -23,12 +25,14 @@ function HomePage() {
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
       <Navigation />
-      <main>
+      <main className="flex-grow">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/quote" element={<QuoteCalculator />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

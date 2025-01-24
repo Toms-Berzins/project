@@ -323,7 +323,7 @@ app.post('/api/quotes', authenticateToken, async (req: Request, res: Response) =
 });
 
 // Test endpoint for database connection
-app.get('/api/test-db', async (req: Request, res: Response) => {
+app.get('/api/test-db', async (_req: Request, res: Response) => {
   try {
     // Try to get the connection status
     const dbState = mongoose.connection.readyState;
