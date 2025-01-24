@@ -10,7 +10,15 @@ interface LoginModalProps {
   prefillEmail?: string;
 }
 
-export const LoginModal = ({ onLogin, onSignup, onSocialLogin, onClose, error, prefillName, prefillEmail }: LoginModalProps) => {
+export const LoginModal: React.FC<LoginModalProps> = ({
+  onLogin,
+  onSignup,
+  onSocialLogin,
+  onClose,
+  error,
+  prefillName,
+  prefillEmail,
+}) => {
   const [isLoginView, setIsLoginView] = useState(true);
 
   // Switch to login view if duplicate email error occurs
@@ -138,29 +146,47 @@ export const LoginModal = ({ onLogin, onSignup, onSocialLogin, onClose, error, p
                 (form.elements.namedItem('name') as HTMLInputElement).value
               );
             }}>
-              <input
-                type="text"
-                name="name"
-                placeholder="Full Name"
-                defaultValue={prefillName}
-                className="w-full p-2 border rounded mb-2"
-                required
-              />
-              <input
-                type="email"
-                name="email"
-                placeholder="Email"
-                defaultValue={prefillEmail}
-                className="w-full p-2 border rounded mb-2"
-                required
-              />
-              <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                className="w-full p-2 border rounded mb-4"
-                required
-              />
+              <div className="mb-2">
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  placeholder="Enter your full name"
+                  defaultValue={prefillName}
+                  className="w-full p-2 border rounded"
+                  required
+                />
+              </div>
+              <div className="mb-2">
+                <label htmlFor="signup-email" className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="signup-email"
+                  name="email"
+                  placeholder="Enter your email"
+                  defaultValue={prefillEmail}
+                  className="w-full p-2 border rounded"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="signup-password" className="block text-sm font-medium text-gray-700 mb-1">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  id="signup-password"
+                  name="password"
+                  placeholder="Create a password"
+                  className="w-full p-2 border rounded"
+                  required
+                />
+              </div>
               <button
                 type="submit"
                 className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition-colors"
