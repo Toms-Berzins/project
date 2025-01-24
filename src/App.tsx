@@ -11,6 +11,8 @@ import Testimonials from './components/Testimonials';
 import FAQ from './components/FAQ';
 import PrivacyPolicy from './components/legal/PrivacyPolicy';
 import TermsOfService from './components/legal/TermsOfService';
+import Blog from './components/blog/Blog';
+import BlogPost from './components/blog/BlogPost';
 
 function HomePage() {
   return (
@@ -34,6 +36,8 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/quote" element={<QuoteCalculator />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="*" element={<Navigate to="/" replace />} />

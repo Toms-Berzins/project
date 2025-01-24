@@ -197,7 +197,7 @@ export default function Contact() {
                         className="text-accent hover:text-accent/80 font-medium inline-flex items-center"
                       >
                         <Map className="w-4 h-4 mr-1" />
-                        Get Directions →
+                        Get Directions
                       </button>
                       <a
                         href="https://waze.com/ul?ll=40.713129,-74.003694&navigate=yes"
@@ -206,7 +206,7 @@ export default function Contact() {
                         className="text-accent hover:text-accent/80 font-medium inline-flex items-center"
                       >
                         <Navigation className="w-4 h-4 mr-1" />
-                        Open in Waze →
+                        Open in Waze
                       </a>
                     </div>
                   </div>

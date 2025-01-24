@@ -9,6 +9,7 @@ import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as FacebookStrategy } from 'passport-facebook';
 import session from 'express-session';
+import blogRoutes from './api/blog';
 
 // Extend Express types using module augmentation
 declare module 'express-serve-static-core' {
@@ -344,7 +345,18 @@ app.get('/api/test-db', async (_req: Request, res: Response) => {
   }
 });
 
+// API Routes
+app.use('/api/blog', blogRoutes);
+
+// Error handling middleware
+app.use((err: Error, _req: express.Request, res: express.Response) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Something broke!' });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-}); 
+});
+
+export default app; 

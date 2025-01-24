@@ -1,0 +1,81 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  quotes    Quote[]
+}
+
+model Quote {
+  id            String   @id @default(uuid())
+  reference     String   @unique
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  material      String
+  dimensions    Json     // Stores the dimensions object
+  coating       Json     // Stores the coating object
+  color         Json     // Stores the color object
+  quantity      Int
+  addons        String[] // Array of addon IDs
+  requirements  String?
+  totalPrice    Float
+  status        QuoteStatus @default(PENDING)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model BlogPost {
+  id        String   @id @default(cuid())
+  title     String
+  slug      String   @unique
+  content   String   @db.Text
+  excerpt   String
+  author    String
+  date      DateTime
+  category  String
+  imageUrl  String
+  featured  Boolean  @default(false)
+  tags      String[]
+  
+  // Social media integration
+  tiktokEmbed      String?
+  instagramEmbed   String?
+  tiktokUsername   String?
+  instagramUsername String?
+  
+  // SEO fields
+  metaTitle       String?
+  metaDescription String?
+  keywords        String[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([category])
+  @@index([date])
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+}
+
+enum QuoteStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PAID
+} 
