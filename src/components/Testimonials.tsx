@@ -83,13 +83,13 @@ export default function Testimonials() {
   };
 
   return (
-    <section className="py-24 bg-white dark:bg-gray-900">
+    <section className="py-24 section-pattern">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4 hero-title">
             Client Testimonials
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8">
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8 hero-description">
             Don't just take our word for it. Here's what our clients have to say
             about our powder coating services.
           </p>
@@ -99,10 +99,10 @@ export default function Testimonials() {
               <button
                 key={type}
                 onClick={() => setSelectedType(type)}
-                className={`px-4 py-2 rounded-full ${
+                className={`px-4 py-2 rounded-full transition-colors ${
                   selectedType === type
-                    ? 'bg-accent text-white'
-                    : 'bg-gray-200 dark:bg-gray-700'
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-gray-700'
                 }`}
                 title={`Filter by ${type} projects`}
                 aria-label={`Filter testimonials by ${type} projects`}
@@ -119,7 +119,7 @@ export default function Testimonials() {
               key={testimonial.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6"
+              className="glass-effect dark:glass-effect-dark rounded-2xl p-6"
             >
               <div className="flex items-center space-x-4 mb-4">
                 <img

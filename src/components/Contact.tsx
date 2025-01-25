@@ -1,7 +1,8 @@
-import { Phone, Mail, MapPin, Clock, MessageSquare, Check, MessageCircle } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, MessageSquare, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
-import './Contact.css';
+import '../styles/sections.css';
+import '../styles/contact.css';
 
 interface FormData {
   name: string;
@@ -26,7 +27,6 @@ export default function Contact() {
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
 
   const subjectOptions = [
     'General Inquiry',
@@ -76,7 +76,6 @@ export default function Contact() {
       await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
       console.log('Contact form submitted:', formData);
       
-      setShowSuccess(true);
       toast.success('Message sent successfully!');
       
       // Reset form after 2 seconds
@@ -88,7 +87,6 @@ export default function Contact() {
           subject: '',
           message: '',
         });
-        setShowSuccess(false);
       }, 2000);
     } catch {
       toast.error('Failed to send message. Please try again.');
@@ -122,13 +120,13 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" className="py-24 bg-gray-50 dark:bg-gray-900">
+    <section id="contact" className="section-pattern py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className="hero-title text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Contact Us
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+          <p className="hero-description text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Get in touch with our team for any questions about our powder coating
             services or to discuss your project.
           </p>
@@ -137,54 +135,45 @@ export default function Contact() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Contact Information */}
           <div className="space-y-8">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
+            <div className="contact-info-card">
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                 Contact Information
               </h3>
               <div className="space-y-6">
-                <div className="flex items-start space-x-4">
-                  <div className="p-3 bg-accent/10 rounded-lg">
-                    <Phone className="w-6 h-6 text-accent" />
+                <div className="contact-info-item">
+                  <div className="contact-icon-wrapper">
+                    <Phone className="contact-icon" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white">
-                      Phone
-                    </h4>
-                    <a
-                      href="tel:+1234567890"
-                      className="text-gray-600 dark:text-gray-300 hover:text-accent"
-                    >
+                    <h4 className="contact-text-primary">Phone</h4>
+                    <a href="tel:+1234567890" className="contact-text-secondary">
                       (123) 456-7890
                     </a>
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-4">
-                  <div className="p-3 bg-accent/10 rounded-lg">
-                    <Mail className="w-6 h-6 text-accent" />
+                <div className="contact-info-item">
+                  <div className="contact-icon-wrapper">
+                    <Mail className="contact-icon" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white">
-                      Email
-                    </h4>
+                    <h4 className="contact-text-primary">Email</h4>
                     <a
                       href="mailto:info@powderpro.com"
-                      className="text-gray-600 dark:text-gray-300 hover:text-accent"
+                      className="contact-text-secondary"
                     >
                       info@powderpro.com
                     </a>
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-4">
-                  <div className="p-3 bg-accent/10 rounded-lg">
-                    <MapPin className="w-6 h-6 text-accent" />
+                <div className="contact-info-item">
+                  <div className="contact-icon-wrapper">
+                    <MapPin className="contact-icon" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white">
-                      Location
-                    </h4>
-                    <p className="text-gray-600 dark:text-gray-300">
+                    <h4 className="contact-text-primary">Location</h4>
+                    <p className="contact-text-secondary">
                       123 Coating Street
                       <br />
                       Industrial District
@@ -193,22 +182,20 @@ export default function Contact() {
                     </p>
                     <button
                       onClick={handleGetDirections}
-                      className="mt-2 text-accent hover:text-accent/80 font-medium"
+                      className="mt-2 text-orange-500 hover:text-orange-600 font-medium"
                     >
                       Get Directions →
                     </button>
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-4">
-                  <div className="p-3 bg-accent/10 rounded-lg">
-                    <Clock className="w-6 h-6 text-accent" />
+                <div className="contact-info-item">
+                  <div className="contact-icon-wrapper">
+                    <Clock className="contact-icon" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white">
-                      Business Hours
-                    </h4>
-                    <p className="text-gray-600 dark:text-gray-300">
+                    <h4 className="contact-text-primary">Business Hours</h4>
+                    <p className="contact-text-secondary">
                       Monday - Friday: 8:00 AM - 6:00 PM
                       <br />
                       Saturday: 9:00 AM - 2:00 PM
@@ -221,16 +208,16 @@ export default function Contact() {
             </div>
 
             {/* Quick Contact Options */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
+            <div className="contact-info-card">
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                 Quick Contact
               </h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="quick-contact-grid">
                 <a
                   href="https://wa.me/1234567890"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center p-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                  className="quick-contact-button whatsapp"
                 >
                   <MessageCircle className="w-5 h-5 mr-2" />
                   WhatsApp Chat
@@ -239,7 +226,7 @@ export default function Contact() {
                   href="https://m.me/yourpage"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center p-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  className="quick-contact-button messenger"
                 >
                   <MessageSquare className="w-5 h-5 mr-2" />
                   Messenger
@@ -248,27 +235,24 @@ export default function Contact() {
             </div>
 
             {/* Map */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
+            <div className="contact-info-card">
               <iframe
                 title="Business Location"
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3024.2219901290355!2d-74.00369368400567!3d40.71312937933185!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25a23e28c1191%3A0x49f75d3281df052a!2s150%20Park%20Row%2C%20New%20York%2C%20NY%2010007!5e0!3m2!1sen!2sus!4v1644262070010!5m2!1sen!2sus"
-                className="w-full h-[300px] rounded-lg"
+                className="map-container"
                 allowFullScreen
               />
             </div>
           </div>
 
           {/* Contact Form */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
+          <div className="form-container">
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
               Send us a Message
             </h3>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="form-group">
               <div>
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >
+                <label htmlFor="name" className="form-label">
                   Full Name *
                 </label>
                 <input
@@ -277,20 +261,17 @@ export default function Contact() {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className={`w-full p-3 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-accent focus:border-transparent ${
-                    errors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                  className={`form-input ${
+                    errors.name ? 'error' : 'valid'
                   }`}
                 />
                 {errors.name && (
-                  <p className="mt-1 text-sm text-red-500">{errors.name}</p>
+                  <p className="error-message">{errors.name}</p>
                 )}
               </div>
 
               <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >
+                <label htmlFor="email" className="form-label">
                   Email Address *
                 </label>
                 <input
@@ -299,20 +280,17 @@ export default function Contact() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className={`w-full p-3 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-accent focus:border-transparent ${
-                    errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+                  className={`form-input ${
+                    errors.email ? 'error' : 'valid'
                   }`}
                 />
                 {errors.email && (
-                  <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+                  <p className="error-message">{errors.email}</p>
                 )}
               </div>
 
               <div>
-                <label
-                  htmlFor="phone"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >
+                <label htmlFor="phone" className="form-label">
                   Phone Number
                 </label>
                 <input
@@ -321,15 +299,12 @@ export default function Contact() {
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-accent focus:border-transparent"
+                  className="form-input"
                 />
               </div>
 
               <div>
-                <label
-                  htmlFor="subject"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >
+                <label htmlFor="subject" className="form-label">
                   Subject *
                 </label>
                 <select
@@ -337,9 +312,7 @@ export default function Contact() {
                   name="subject"
                   value={formData.subject}
                   onChange={handleChange}
-                  className={`w-full p-3 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-accent focus:border-transparent ${
-                    errors.subject ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                  }`}
+                  className="form-input"
                 >
                   <option value="">Select a subject</option>
                   {subjectOptions.map((option) => (
@@ -349,15 +322,12 @@ export default function Contact() {
                   ))}
                 </select>
                 {errors.subject && (
-                  <p className="mt-1 text-sm text-red-500">{errors.subject}</p>
+                  <p className="error-message">{errors.subject}</p>
                 )}
               </div>
 
               <div>
-                <label
-                  htmlFor="message"
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >
+                <label htmlFor="message" className="form-label">
                   Message *
                 </label>
                 <textarea
@@ -366,35 +336,19 @@ export default function Contact() {
                   value={formData.message}
                   onChange={handleChange}
                   rows={6}
-                  className={`w-full p-3 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-accent focus:border-transparent ${
-                    errors.message ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
-                  }`}
+                  className="form-input"
                 />
                 {errors.message && (
-                  <p className="mt-1 text-sm text-red-500">{errors.message}</p>
+                  <p className="error-message">{errors.message}</p>
                 )}
               </div>
 
               <button
                 type="submit"
+                className="submit-button"
                 disabled={isSubmitting}
-                className={`w-full inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg text-base font-medium text-white transition-all ${
-                  showSuccess
-                    ? 'bg-green-500 hover:bg-green-600'
-                    : 'bg-accent hover:bg-accent/90'
-                } ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''}`}
               >
-                {showSuccess ? (
-                  <>
-                    Message Sent
-                    <Check className="w-5 h-5 ml-2" />
-                  </>
-                ) : (
-                  <>
-                    {isSubmitting ? 'Sending...' : 'Send Message'}
-                    <MessageSquare className="w-5 h-5 ml-2" />
-                  </>
-                )}
+                {isSubmitting ? 'Sending...' : 'Send Message'}
               </button>
             </form>
           </div>

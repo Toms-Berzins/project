@@ -1,0 +1,40 @@
+@import './utilities.css';
+
+@layer components {
+  .faq-container {
+    @apply space-y-4;
+  }
+
+  .faq-item {
+    @apply glass-effect dark:glass-effect-dark rounded-lg overflow-hidden;
+  }
+
+  .faq-question {
+    @apply w-full px-6 py-4 flex items-center justify-between text-left;
+  }
+
+  .faq-question-text {
+    @apply text-lg font-medium text-gray-900 dark:text-white;
+  }
+
+  .faq-icon {
+    @apply w-5 h-5 text-orange-500 flex-shrink-0;
+  }
+
+  .faq-answer {
+    @apply px-6 pb-4;
+  }
+
+  .faq-answer-text {
+    @apply text-gray-600 dark:text-gray-300;
+  }
+
+  /* FAQ animations */
+  .faq-item[data-state="open"] .faq-icon {
+    @apply transform rotate-180;
+  }
+
+  .faq-answer {
+    @apply transition-all duration-200;
+  }
+} 

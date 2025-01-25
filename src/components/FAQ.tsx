@@ -1,5 +1,6 @@
 import { Plus, Minus } from 'lucide-react';
 import { useState } from 'react';
+import '../styles/faq.css';
 
 interface FAQItem {
   question: string;
@@ -37,39 +38,38 @@ export default function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <section className="py-24 bg-gray-50 dark:bg-gray-900">
+    <section className="section-pattern py-24">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className="hero-title text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Frequently Asked Questions
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300">
+          <p className="hero-description text-xl text-gray-600 dark:text-gray-300">
             Find answers to common questions about our powder coating services.
           </p>
         </div>
 
-        <div className="space-y-4">
+        <div className="faq-container">
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden"
+              className="faq-item"
+              data-state={openIndex === index ? 'open' : 'closed'}
             >
               <button
-                className="w-full px-6 py-4 flex items-center justify-between text-left"
+                className="faq-question"
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
               >
-                <span className="text-lg font-medium text-gray-900 dark:text-white">
-                  {faq.question}
-                </span>
+                <span className="faq-question-text">{faq.question}</span>
                 {openIndex === index ? (
-                  <Minus className="w-5 h-5 text-accent flex-shrink-0" />
+                  <Minus className="faq-icon" />
                 ) : (
-                  <Plus className="w-5 h-5 text-accent flex-shrink-0" />
+                  <Plus className="faq-icon" />
                 )}
               </button>
               {openIndex === index && (
-                <div className="px-6 pb-4">
-                  <p className="text-gray-600 dark:text-gray-300">{faq.answer}</p>
+                <div className="faq-answer">
+                  <p className="faq-answer-text">{faq.answer}</p>
                 </div>
               )}
             </div>

@@ -10,6 +10,7 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as FacebookStrategy } from 'passport-facebook';
 import session from 'express-session';
 import blogRoutes from './api/blog';
+import socialRoutes from './api/social';
 
 // Extend Express types using module augmentation
 declare module 'express-serve-static-core' {
@@ -168,6 +169,7 @@ passport.use(new FacebookStrategy({
 
 // Mount blog routes
 app.use('/api/blog', blogRoutes);
+app.use('/api/social', socialRoutes);
 
 // Auth Routes
 app.get('/api/auth/google',

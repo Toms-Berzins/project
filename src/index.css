@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import './styles/utilities.css';
+@import './styles/sections.css';
 
 @layer base {
   html {
@@ -27,4 +26,4 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
+} 

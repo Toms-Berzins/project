@@ -1,0 +1,30 @@
+/* Hero Section */
+.hero-gradient {
+  background: linear-gradient(
+    165deg,
+    rgba(237, 137, 54, 0.05) 0%,
+    rgba(221, 121, 38, 0.05) 40%,
+    transparent 100%
+  );
+}
+
+:root[data-theme="dark"] .hero-gradient {
+  background: linear-gradient(
+    165deg,
+    rgba(17, 24, 39, 1) 0%,
+    rgba(17, 24, 39, 0.95) 40%,
+    rgba(17, 24, 39, 0.9) 100%
+  );
+}
+
+.hero-title {
+  animation: fadeInUp 1s ease-out;
+}
+
+.hero-description {
+  animation: fadeInUp 1s ease-out 0.2s backwards;
+}
+
+.hero-buttons {
+  animation: fadeInUp 1s ease-out 0.4s backwards;
+} 
