@@ -8,7 +8,8 @@ import Portfolio from './components/portfolio/Portfolio';
 import Contact from './components/Contact';
 import Testimonials from './components/Testimonials';
 import FAQ from './components/FAQ';
-import { useEffect } from 'react';
+import Particles from './components/effects/Particles';
+import WorkshopUpdates from './components/WorkshopUpdates';
 
 export function HomePage() {
   return (
@@ -16,6 +17,7 @@ export function HomePage() {
       <Hero />
       <Services />
       <Portfolio />
+      <WorkshopUpdates />
       <Testimonials />
       <FAQ />
       <Contact />
@@ -24,20 +26,19 @@ export function HomePage() {
 }
 
 function App() {
-  // Initialize theme
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-  }, []);
-
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Navigation />
-      <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
-      <main className="flex-grow">
-        <Outlet />
-      </main>
-      <Footer />
+    <div className="flex flex-col min-h-screen bg-primary relative">
+      <div className="absolute inset-0 overflow-hidden">
+        <Particles />
+      </div>
+      <div className="relative flex flex-col min-h-screen">
+        <Navigation />
+        <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
+        <main className="flex-grow">
+          <Outlet />
+        </main>
+        <Footer />
+      </div>
     </div>
   );
 }

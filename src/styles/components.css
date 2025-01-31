@@ -1,0 +1,338 @@
+/**
+ * Component Styles
+ * All UI component styles consolidated
+ */
+
+/* Base Card Styles */
+.card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--glass-border);
+  border-radius: 1rem;
+  transition: all 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -8px var(--shadow-color);
+}
+
+.card-glass {
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+}
+
+.card-content {
+  padding: 1.5rem;
+}
+
+.card-header {
+  margin-bottom: 1rem;
+}
+
+.card-footer {
+  padding-top: 1rem;
+  border-top: 1px solid var(--glass-border);
+  margin-top: auto;
+}
+
+/* Button Base Styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  gap: 0.5rem;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Primary Button */
+.btn-primary {
+  background-color: var(--accent-color);
+  color: white;
+  border: 1px solid transparent;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px -4px rgba(var(--accent-rgb), 0.3);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Secondary Button */
+.btn-secondary {
+  background-color: rgba(var(--accent-rgb), 0.1);
+  color: var(--accent-color);
+  border: 1px solid rgba(var(--accent-rgb), 0.2);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: rgba(var(--accent-rgb), 0.15);
+  border-color: rgba(var(--accent-rgb), 0.3);
+}
+
+/* Outline Button */
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background-color: var(--bg-secondary);
+  border-color: var(--text-secondary);
+}
+
+/* Ghost Button */
+.btn-ghost {
+  background-color: transparent;
+  border: none;
+  color: var(--text-primary);
+  padding: 0.5rem 1rem;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background-color: var(--bg-secondary);
+}
+
+/* Button Sizes */
+.btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.btn-lg {
+  padding: 0.75rem 1.5rem;
+  font-size: 1.125rem;
+}
+
+/* Icon Button */
+.btn-icon {
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+}
+
+.btn-icon.btn-sm {
+  padding: 0.375rem;
+}
+
+.btn-icon.btn-lg {
+  padding: 0.625rem;
+}
+
+/* Loading State */
+.btn-loading {
+  position: relative;
+  color: transparent !important;
+}
+
+.btn-loading::after {
+  content: '';
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid;
+  border-radius: 50%;
+  border-color: currentColor transparent currentColor transparent;
+  animation: button-spin 0.8s linear infinite;
+}
+
+@keyframes button-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Theme-specific overrides */
+[data-theme="dark"] .btn-outline {
+  border-color: var(--glass-border);
+}
+
+[data-theme="dark"] .btn-ghost:hover:not(:disabled) {
+  background-color: rgba(var(--bg-secondary-rgb), 0.5);
+}
+
+[data-theme="light"] .card-glass {
+  background: rgba(255, 255, 255, 0.98);
+}
+
+/* Card Grid System */
+.card-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+}
+
+/* Card Media */
+.card-media {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-media img,
+.card-media video {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+/* Card Badges */
+.card-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background-color: rgba(var(--accent-rgb), 0.1);
+  color: var(--accent-color);
+  border: 1px solid rgba(var(--accent-rgb), 0.2);
+}
+
+/* Social Feed Component */
+.social-feed-grid {
+  opacity: 0;
+  animation: fadeIn 0.5s ease-in-out forwards;
+  background-color: var(--bg-secondary);
+}
+
+.social-post {
+  transition: all 0.3s ease-in-out;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+}
+
+/* Hero Section */
+.hero {
+  position: relative;
+  min-height: calc(100vh - 4rem);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 10;
+  max-width: 65ch;
+}
+
+/* Portfolio Grid */
+.portfolio-grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+}
+
+.portfolio-item {
+  position: relative;
+  border-radius: 1rem;
+  overflow: hidden;
+  background: var(--bg-primary);
+}
+
+/* Services Section */
+.services-grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+}
+
+.service-card {
+  padding: 2rem;
+  border-radius: 1rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--glass-border);
+}
+
+/* FAQ Accordion */
+.faq-item {
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.faq-question {
+  padding: 1.5rem 0;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Contact Form */
+.contact-form {
+  display: grid;
+  gap: 1.5rem;
+  max-width: 40rem;
+  margin: 0 auto;
+}
+
+.form-group {
+  display: grid;
+  gap: 0.5rem;
+}
+
+/* Theme-specific overrides */
+[data-theme="dark"] {
+  .portfolio-item::before,
+  .service-card::before {
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0, 0, 0, 0.8) 100%
+    );
+  }
+
+  .form-input {
+    background-color: rgba(var(--bg-secondary-rgb), 0.8);
+    border-color: rgba(var(--text-secondary-rgb), 0.2);
+  }
+}
+
+[data-theme="light"] {
+  .portfolio-item::before,
+  .service-card::before {
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(255, 255, 255, 0.8) 100%
+    );
+  }
+}
+
+/* Section Patterns */
+.section-pattern {
+  position: relative;
+  background-color: var(--bg-primary);
+  overflow: hidden;
+}
+
+.section-pattern::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(
+    circle at center center,
+    var(--pattern-color) 0%,
+    transparent 8%
+  );
+  background-size: 24px 24px;
+  opacity: 0.1;
+  pointer-events: none;
+} 

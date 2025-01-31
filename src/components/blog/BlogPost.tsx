@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaTiktok, FaInstagram, FaFacebook, FaTwitter } from 'react-icons/fa';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import SocialEmbed from './SocialEmbed';
+import SocialEmbed from '../ui/SocialEmbed';
 
 interface BlogPost {
   title: string;
@@ -200,7 +200,7 @@ export default function BlogPost() {
             >
               <SocialEmbed
                 platform="tiktok"
-                embedCode={post.socialMedia.tiktokEmbed}
+                embedId={post.socialMedia.tiktokEmbed}
                 className="aspect-video"
               />
             </motion.div>
@@ -213,7 +213,7 @@ export default function BlogPost() {
             >
               <SocialEmbed
                 platform="instagram"
-                embedCode={post.socialMedia.instagramEmbed}
+                embedId={post.socialMedia.instagramEmbed}
                 className="aspect-square"
               />
             </motion.div>

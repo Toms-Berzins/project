@@ -1,6 +1,13 @@
 import { coatingTypes, finishTypes } from '../constants';
 import { FormData } from '../types';
-import { commonInputClasses, errorInputClasses, labelClasses } from '../styles';
+import { motion } from 'framer-motion';
+import { 
+  selectClasses,
+  errorInputClasses,
+  floatingLabelClasses,
+  inputContainerClasses,
+  errorMessageClasses
+} from '../styles';
 
 interface CoatingStepProps {
   formData: FormData;
@@ -13,15 +20,17 @@ export const CoatingStep = ({
   errors,
   updateFormData,
 }: CoatingStepProps) => (
-  <div className="space-y-6">
-    <div>
-      <label className={labelClasses}>Coating Type</label>
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    className="space-y-8"
+  >
+    <div className={inputContainerClasses}>
       <select
         value={formData.coating.type}
         onChange={(e) => updateFormData('coating.type', e.target.value)}
-        className={`${commonInputClasses} ${
-          errors.coatingType ? errorInputClasses : ''
-        }`}
+        className={`${selectClasses} ${errors.coatingType ? errorInputClasses : ''}`}
         aria-label="Coating Type"
         title="Select coating type"
       >
@@ -32,19 +41,19 @@ export const CoatingStep = ({
           </option>
         ))}
       </select>
+      <label className={floatingLabelClasses}>
+        Coating Type
+      </label>
       {errors.coatingType && (
-        <p className="mt-1 text-sm text-red-500">{errors.coatingType}</p>
+        <p className={errorMessageClasses}>{errors.coatingType}</p>
       )}
     </div>
 
-    <div>
-      <label className={labelClasses}>Finish Type</label>
+    <div className={inputContainerClasses}>
       <select
         value={formData.coating.finish}
         onChange={(e) => updateFormData('coating.finish', e.target.value)}
-        className={`${commonInputClasses} ${
-          errors.finish ? errorInputClasses : ''
-        }`}
+        className={`${selectClasses} ${errors.finish ? errorInputClasses : ''}`}
         aria-label="Finish Type"
         title="Select finish type"
       >
@@ -55,9 +64,12 @@ export const CoatingStep = ({
           </option>
         ))}
       </select>
+      <label className={floatingLabelClasses}>
+        Finish Type
+      </label>
       {errors.finish && (
-        <p className="mt-1 text-sm text-red-500">{errors.finish}</p>
+        <p className={errorMessageClasses}>{errors.finish}</p>
       )}
     </div>
-  </div>
+  </motion.div>
 ); 

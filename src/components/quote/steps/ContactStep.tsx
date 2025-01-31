@@ -1,5 +1,12 @@
 import { FormData, PriceBreakdown } from '../types';
-import { commonInputClasses, errorInputClasses, labelClasses } from '../styles';
+import { motion } from 'framer-motion';
+import { 
+  commonInputClasses,
+  errorInputClasses,
+  floatingLabelClasses,
+  inputContainerClasses,
+  errorMessageClasses
+} from '../styles';
 
 interface ContactStepProps {
   formData: FormData;
@@ -14,116 +21,129 @@ export const ContactStep = ({
   priceBreakdown,
   updateFormData,
 }: ContactStepProps) => (
-  <div className="space-y-6">
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    className="space-y-8"
+  >
     {priceBreakdown && (
-      <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg mb-6">
-        <h3 className="text-lg font-semibold mb-4">Price Breakdown</h3>
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <span>Base Cost:</span>
-            <span>${priceBreakdown.base.toFixed(2)}</span>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700"
+      >
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Price Breakdown
+        </h3>
+        <div className="space-y-3">
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600 dark:text-gray-400">Base Cost:</span>
+            <span className="font-medium text-gray-900 dark:text-white">
+              ${priceBreakdown.base.toFixed(2)}
+            </span>
           </div>
-          <div className="flex justify-between">
-            <span>Coating:</span>
-            <span>${priceBreakdown.coating.toFixed(2)}</span>
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600 dark:text-gray-400">Coating:</span>
+            <span className="font-medium text-gray-900 dark:text-white">
+              ${priceBreakdown.coating.toFixed(2)}
+            </span>
           </div>
-          <div className="flex justify-between">
-            <span>Finish:</span>
-            <span>${priceBreakdown.finish.toFixed(2)}</span>
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600 dark:text-gray-400">Finish:</span>
+            <span className="font-medium text-gray-900 dark:text-white">
+              ${priceBreakdown.finish.toFixed(2)}
+            </span>
           </div>
-          <div className="flex justify-between">
-            <span>Size Adjustment:</span>
-            <span>${priceBreakdown.volume.toFixed(2)}</span>
+          <div className="flex justify-between items-center">
+            <span className="text-gray-600 dark:text-gray-400">Size Adjustment:</span>
+            <span className="font-medium text-gray-900 dark:text-white">
+              ${priceBreakdown.volume.toFixed(2)}
+            </span>
           </div>
           {priceBreakdown.addons > 0 && (
-            <div className="flex justify-between">
-              <span>Add-ons:</span>
-              <span>${priceBreakdown.addons.toFixed(2)}</span>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600 dark:text-gray-400">Add-ons:</span>
+              <span className="font-medium text-gray-900 dark:text-white">
+                ${priceBreakdown.addons.toFixed(2)}
+              </span>
             </div>
           )}
-          <div className="border-t pt-2 mt-2">
-            <div className="flex justify-between font-semibold">
-              <span>Total Estimate:</span>
-              <span>${priceBreakdown.total.toFixed(2)}</span>
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
+            <div className="flex justify-between items-center">
+              <span className="text-lg font-semibold text-gray-900 dark:text-white">
+                Total Estimate:
+              </span>
+              <span className="text-lg font-bold text-accent">
+                ${priceBreakdown.total.toFixed(2)}
+              </span>
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     )}
 
-    <div className="grid grid-cols-2 gap-4">
-      <div>
-        <label className={labelClasses}>Name</label>
+    <div className="grid grid-cols-2 gap-6">
+      <div className={inputContainerClasses}>
         <input
           type="text"
           value={formData.contact.name}
-          onChange={(e) =>
-            updateFormData('contact.name', e.target.value)
-          }
-          className={`${commonInputClasses} ${
-            errors.name ? errorInputClasses : ''
-          }`}
-          aria-label="Name"
-          title="Enter your name"
+          onChange={(e) => updateFormData('contact.name', e.target.value)}
+          className={`${commonInputClasses} ${errors.name ? errorInputClasses : ''}`}
           placeholder="Enter your name"
         />
+        <label className={floatingLabelClasses}>
+          Name
+        </label>
         {errors.name && (
-          <p className="mt-1 text-sm text-red-500">{errors.name}</p>
+          <p className={errorMessageClasses}>{errors.name}</p>
         )}
       </div>
 
-      <div>
-        <label className={labelClasses}>Phone</label>
+      <div className={inputContainerClasses}>
         <input
           type="tel"
           value={formData.contact.phone}
-          onChange={(e) =>
-            updateFormData('contact.phone', e.target.value)
-          }
-          className={`${commonInputClasses} ${
-            errors.phone ? errorInputClasses : ''
-          }`}
-          aria-label="Phone"
-          title="Enter your phone number"
+          onChange={(e) => updateFormData('contact.phone', e.target.value)}
+          className={`${commonInputClasses} ${errors.phone ? errorInputClasses : ''}`}
           placeholder="Enter your phone number"
         />
+        <label className={floatingLabelClasses}>
+          Phone
+        </label>
         {errors.phone && (
-          <p className="mt-1 text-sm text-red-500">{errors.phone}</p>
+          <p className={errorMessageClasses}>{errors.phone}</p>
         )}
       </div>
     </div>
 
-    <div>
-      <label className={labelClasses}>Email</label>
+    <div className={inputContainerClasses}>
       <input
         type="email"
         value={formData.contact.email}
-        onChange={(e) =>
-          updateFormData('contact.email', e.target.value)
-        }
-        className={`${commonInputClasses} ${
-          errors.email ? errorInputClasses : ''
-        }`}
-        aria-label="Email"
-        title="Enter your email"
+        onChange={(e) => updateFormData('contact.email', e.target.value)}
+        className={`${commonInputClasses} ${errors.email ? errorInputClasses : ''}`}
         placeholder="Enter your email"
       />
+      <label className={floatingLabelClasses}>
+        Email
+      </label>
       {errors.email && (
-        <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+        <p className={errorMessageClasses}>{errors.email}</p>
       )}
     </div>
 
-    <div>
-      <label className={labelClasses}>Additional Comments</label>
+    <div className={inputContainerClasses}>
       <textarea
         value={formData.contact.comments}
-        onChange={(e) =>
-          updateFormData('contact.comments', e.target.value)
-        }
+        onChange={(e) => updateFormData('contact.comments', e.target.value)}
         rows={4}
-        className={commonInputClasses}
+        className={`${commonInputClasses} min-h-[120px] resize-y`}
         placeholder="Any special instructions or requirements?"
       />
+      <label className={floatingLabelClasses}>
+        Additional Comments
+      </label>
     </div>
-  </div>
+  </motion.div>
 ); 

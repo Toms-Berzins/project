@@ -1,4 +1,4 @@
-import express, { Request, Response, RequestHandler } from 'express';
+import express, { Request, Response, RequestHandler, NextFunction } from 'express';
 import nodemailer from 'nodemailer';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -387,9 +387,39 @@ app.get('/api/test-db', async (_req: Request, res: Response) => {
 });
 
 // Error handling middleware
-app.use((err: Error, _req: express.Request, res: express.Response) => {
+app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
+  if (res.headersSent) {
+    return next(err);
+  }
   res.status(500).json({ error: 'Something broke!' });
+});
+
+// Add proper error handling for passport authentication
+app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
+  if (err.name === 'UnauthorizedError') {
+    res.status(401).json({ error: 'Invalid token' });
+  } else {
+    next(err);
+  }
+});
+
+// Add proper error handling for MongoDB errors
+app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
+  if (err.name === 'MongoError' || err.name === 'MongoServerError') {
+    res.status(503).json({ error: 'Database error occurred' });
+  } else {
+    next(err);
+  }
+});
+
+// Final catch-all error handler
+app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
+  console.error('Unhandled error:', err);
+  if (!res.headersSent) {
+    res.status(500).json({ error: 'An unexpected error occurred' });
+  }
+  next(err);
 });
 
 const PORT = process.env.PORT || 3000;

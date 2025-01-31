@@ -1,10 +1,68 @@
 import { ArrowRight } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import SocialFeed from './blog/SocialFeed';
-import '../styles/sections.css';
+import { motion, useMotionValue, useTransform, useSpring, useScroll } from 'framer-motion';
+import { InteractiveButton } from './ui/Button';
+import { useEffect, useRef } from 'react';
+import Particles from './effects/Particles';
+
+const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+};
+
+const staggerChildren = {
+  animate: {
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
 
 export default function Hero() {
   const location = useLocation();
+  const cardRef = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const { scrollY } = useScroll();
+
+  const rotateX = useTransform(y, [-300, 300], [10, -10]);
+  const rotateY = useTransform(x, [-300, 300], [-10, 10]);
+  const parallaxY = useTransform(scrollY, [0, 500], [0, -100]);
+
+  const springConfig = { stiffness: 150, damping: 15, mass: 0.8 };
+  const rotateXSpring = useSpring(rotateX, springConfig);
+  const rotateYSpring = useSpring(rotateY, springConfig);
+
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = card.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const deltaX = e.clientX - centerX;
+      const deltaY = e.clientY - centerY;
+      
+      // Smooth easing for mouse movement
+      x.set(deltaX * 0.5);
+      y.set(deltaY * 0.5);
+    };
+
+    const handleMouseLeave = () => {
+      x.set(0);
+      y.set(0);
+    };
+
+    card.addEventListener('mousemove', handleMouseMove);
+    card.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      card.removeEventListener('mousemove', handleMouseMove);
+      card.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, [x, y]);
 
   const handlePortfolioClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -19,75 +77,96 @@ export default function Hero() {
   };
 
   return (
-    <div className="relative section-pattern">
+    <section className="relative min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex items-center py-20 overflow-hidden">
+      {/* Particles Background */}
+      <div className="absolute inset-0">
+        <Particles />
+        <div className="absolute inset-0 bg-gradient-radial from-orange-500/10 via-transparent to-transparent animate-pulse" />
+      </div>
+
       {/* Hero Section */}
-      <div className="hero-gradient min-h-[70vh] flex items-center relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 relative">
-          <div className="max-w-xl">
-            <h1 className="hero-title text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-              Premium Powder Coating Solutions
-            </h1>
-            <p className="hero-description text-xl text-gray-600 dark:text-gray-300 mb-8">
-              Transform your metal surfaces with our professional powder coating services. 
-              Durable, beautiful, and environmentally friendly.
-            </p>
-            
-            <div className="hero-buttons flex flex-col sm:flex-row gap-4">
-              <Link
-                to="/quote"
-                className="hover-lift inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-orange-500 hover:bg-orange-600 transition-colors"
-              >
-                Get Started
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Link>
-              <button
-                onClick={handlePortfolioClick}
-                className="hover-lift inline-flex items-center justify-center px-6 py-3 border border-gray-900 dark:border-white text-base font-medium rounded-lg text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
-              >
-                View Portfolio
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Section Divider */}
-      <div className="section-divider" />
-
-      {/* Social Feed Section */}
-      <div className="section-pattern py-16 lg:py-24 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center mb-12 lg:mb-16">
-            <h2 className="hero-title text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-              Latest From Our Workshop
-            </h2>
-            <p className="hero-description text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Stay updated with our recent projects and transformations. Follow us on social media for more inspiration.
-            </p>
-          </div>
-          
-          {/* Social Feed Grid */}
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-50 dark:to-gray-900 opacity-50 pointer-events-none" />
-            <div className="social-feed-grid">
-              <SocialFeed 
-                limit={3} 
-                className="relative z-10" 
-              />
-            </div>
-          </div>
-
-          <div className="text-center mt-12 lg:mt-16">
-            <Link 
-              to="/blog"
-              className="hover-lift inline-flex items-center justify-center px-8 py-3 border border-transparent text-lg font-medium rounded-lg text-white bg-orange-500 hover:bg-orange-600 transition-colors shadow-sm hover:shadow-md"
+      <div className="section-pattern">
+        {/* Hero Content */}
+        <motion.div 
+          className="hero-gradient min-h-[70vh] flex items-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          style={{ y: parallaxY }}
+        >
+          <div className="hero-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 w-full">
+            <motion.div 
+              ref={cardRef}
+              className="max-w-xl glass-enhanced p-8 rounded-2xl card-3d relative backdrop-blur-xl
+                bg-white/5 dark:bg-gray-900/30 border border-white/10 dark:border-white/5
+                shadow-2xl shadow-black/5 dark:shadow-orange-500/5"
+              style={{
+                rotateX: rotateXSpring,
+                rotateY: rotateYSpring
+              }}
+              variants={staggerChildren}
+              initial="initial"
+              animate="animate"
             >
-              View All Updates
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Link>
+              {/* Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-blue-500/10 rounded-2xl opacity-50" />
+              
+              <motion.div className="card-3d-content relative z-10">
+                <motion.h1 
+                  className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6
+                    bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-orange-600
+                    [text-shadow:_0_2px_10px_rgba(251,146,60,0.3)]"
+                  variants={fadeInUp}
+                >
+                  Premium Powder Coating Solutions
+                </motion.h1>
+                <motion.p 
+                  className="text-xl text-gray-300 mb-8
+                    [text-shadow:_0_1px_5px_rgba(255,255,255,0.1)]"
+                  variants={fadeInUp}
+                >
+                  Transform your metal surfaces with our professional powder coating services. 
+                  Durable, beautiful, and environmentally friendly.
+                </motion.p>
+                
+                <motion.div 
+                  className="flex flex-col sm:flex-row gap-4"
+                  variants={fadeInUp}
+                >
+                  <Link 
+                    to="/quote"
+                    className="inline-block group"
+                  >
+                    <InteractiveButton
+                      variant="primary"
+                      size="lg"
+                      icon={<ArrowRight className="w-5 h-5" />}
+                      iconPosition="right"
+                      className="w-full group tooltip glass-effect
+                        bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700
+                        shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30
+                        border border-orange-400/20 hover:border-orange-400/30"
+                    >
+                      Get Started
+                    </InteractiveButton>
+                  </Link>
+                  <InteractiveButton
+                    variant="outline"
+                    size="lg"
+                    onClick={handlePortfolioClick}
+                    className="glass-effect press-effect group tooltip
+                      bg-white/5 hover:bg-white/10 dark:bg-gray-900/30 dark:hover:bg-gray-900/50
+                      backdrop-blur-xl border border-white/10 dark:border-white/5
+                      shadow-lg shadow-black/5 hover:shadow-black/10"
+                  >
+                    View Portfolio
+                  </InteractiveButton>
+                </motion.div>
+              </motion.div>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </section>
   );
 }

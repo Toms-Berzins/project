@@ -1,8 +1,53 @@
-import { Phone, Mail, MapPin, Clock, MessageSquare, MessageCircle } from 'lucide-react';
-import { useState } from 'react';
+import { Phone, Mail, MapPin, Clock, ArrowRight } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
-import '../styles/sections.css';
-import '../styles/contact.css';
+import { motion, AnimatePresence } from 'framer-motion';
+import Input from './ui/Input';
+import { TextArea } from './ui/Input';
+import { InteractiveButton } from './ui/Button';
+import Card, { CardHeader, CardContent, CardTitle } from './ui/Card';
+import Select from './ui/Select';
+import TiltCard from './ui/TiltCard';
+import Particles from './effects/Particles';
+
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      duration: 0.6
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: [0.25, 0.1, 0.25, 1]
+    }
+  }
+};
+
+const contactInfoVariants = {
+  hover: {
+    x: 8,
+    transition: { type: "spring", stiffness: 300 }
+  }
+};
+
+const iconContainerVariants = {
+  hover: {
+    scale: 1.1,
+    backgroundColor: "rgba(249, 115, 22, 0.2)",
+    transition: { type: "spring", stiffness: 300 }
+  }
+};
 
 interface FormData {
   name: string;
@@ -27,6 +72,11 @@ export default function Contact() {
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [shouldLoadIframe, setShouldLoadIframe] = useState(false);
+  const iframeContainerRef = useRef<HTMLDivElement>(null);
 
   const subjectOptions = [
     'General Inquiry',
@@ -36,62 +86,23 @@ export default function Contact() {
     'Other',
   ];
 
-  const validateForm = () => {
-    const newErrors: FormErrors = {};
-    
-    if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
-    }
-    
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
-    }
-    
-    if (!formData.subject) {
-      newErrors.subject = 'Please select a subject';
-    }
-    
-    if (!formData.message.trim()) {
-      newErrors.message = 'Message is required';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      toast.error('Please fill in all required fields correctly');
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      // Here you would typically send the form data to your backend
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
-      console.log('Contact form submitted:', formData);
-      
-      toast.success('Message sent successfully!');
-      
-      // Reset form after 2 seconds
-      setTimeout(() => {
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          subject: '',
-          message: '',
-        });
-      }, 2000);
-    } catch {
-      toast.error('Failed to send message. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+  // Enhanced form validation with real-time feedback
+  const validateField = (name: string, value: string): string => {
+    switch (name) {
+      case 'name':
+        return !value.trim() ? 'Name is required' : '';
+      case 'email':
+        return !value.trim() 
+          ? 'Email is required' 
+          : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+          ? 'Please enter a valid email'
+          : '';
+      case 'subject':
+        return !value ? 'Please select a subject' : '';
+      case 'message':
+        return !value.trim() ? 'Message is required' : '';
+      default:
+        return '';
     }
   };
 
@@ -103,12 +114,68 @@ export default function Contact() {
       ...prev,
       [name]: value,
     }));
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: '',
-      }));
+    
+    // Real-time validation
+    const error = validateField(name, value);
+    setErrors(prev => ({
+      ...prev,
+      [name]: error,
+    }));
+  };
+
+  const handleFocus = (name: string) => {
+    setFocusedField(name);
+  };
+
+  const handleBlur = (name: string) => {
+    setFocusedField(null);
+    // Validate on blur
+    const error = validateField(name, formData[name as keyof FormData]);
+    setErrors(prev => ({
+      ...prev,
+      [name]: error,
+    }));
+  };
+
+  const validateForm = () => {
+    const newErrors: FormErrors = {};
+    Object.keys(formData).forEach(key => {
+      const error = validateField(key, formData[key as keyof FormData]);
+      if (error) newErrors[key] = error;
+    });
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      const form = e.target as HTMLFormElement;
+      form.classList.add('shake');
+      setTimeout(() => form.classList.remove('shake'), 600);
+      
+      toast.error('Please fill in all required fields correctly');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      toast.success('Message sent successfully!');
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: '',
+      });
+    } catch {
+      toast.error('Failed to send message. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -119,241 +186,231 @@ export default function Contact() {
     );
   };
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldLoadIframe(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (iframeContainerRef.current) {
+      observer.observe(iframeContainerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <section id="contact" className="section-pattern py-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="hero-title text-4xl font-bold text-gray-900 dark:text-white mb-4">
+    <section className="relative py-24 bg-gradient-to-b from-gray-900 to-gray-800 overflow-hidden">
+      <div className="absolute inset-0">
+        <Particles />
+      </div>
+      <div className="absolute inset-0 bg-gradient-radial from-orange-500/5 via-transparent to-transparent" />
+      
+      <motion.div 
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div variants={itemVariants} className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent 
+            bg-gradient-to-r from-orange-400 to-orange-600 mb-6
+            [text-shadow:_0_2px_10px_rgba(251,146,60,0.3)]">
             Contact Us
           </h2>
-          <p className="hero-description text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Get in touch with our team for any questions about our powder coating
-            services or to discuss your project.
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-8
+            [text-shadow:_0_1px_5px_rgba(255,255,255,0.1)]">
+            Get in touch with us for all your powder coating needs
           </p>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Contact Information */}
-          <div className="space-y-8">
-            <div className="contact-info-card">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                Contact Information
-              </h3>
-              <div className="space-y-6">
-                <div className="contact-info-item">
-                  <div className="contact-icon-wrapper">
-                    <Phone className="contact-icon" />
-                  </div>
-                  <div>
-                    <h4 className="contact-text-primary">Phone</h4>
-                    <a href="tel:+1234567890" className="contact-text-secondary">
-                      (123) 456-7890
-                    </a>
-                  </div>
-                </div>
-
-                <div className="contact-info-item">
-                  <div className="contact-icon-wrapper">
-                    <Mail className="contact-icon" />
-                  </div>
-                  <div>
-                    <h4 className="contact-text-primary">Email</h4>
-                    <a
-                      href="mailto:info@powderpro.com"
-                      className="contact-text-secondary"
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+          {/* Contact Info Section */}
+          <motion.div variants={itemVariants} className="space-y-8">
+            <TiltCard>
+              <Card className="glass-card bg-gray-900/50 backdrop-blur-xl border border-gray-800">
+                <CardHeader>
+                  <CardTitle className="text-2xl text-white">Get in Touch</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {[
+                    { icon: Phone, title: 'Phone', content: '(123) 456-7890', href: 'tel:+1234567890' },
+                    { icon: Mail, title: 'Email', content: 'info@powderpro.com', href: 'mailto:info@powderpro.com' },
+                    { icon: MapPin, title: 'Location', content: '123 Coating Street\nIndustrial District\nCity, State 12345' },
+                    { icon: Clock, title: 'Business Hours', content: 'Monday - Friday: 8:00 AM - 6:00 PM\nSaturday: 9:00 AM - 2:00 PM\nSunday: Closed' }
+                  ].map(({ icon: Icon, title, content, href }) => (
+                    <motion.div 
+                      key={title}
+                      className="flex items-start space-x-4 group"
+                      variants={contactInfoVariants}
+                      whileHover="hover"
                     >
-                      info@powderpro.com
-                    </a>
-                  </div>
-                </div>
-
-                <div className="contact-info-item">
-                  <div className="contact-icon-wrapper">
-                    <MapPin className="contact-icon" />
-                  </div>
-                  <div>
-                    <h4 className="contact-text-primary">Location</h4>
-                    <p className="contact-text-secondary">
-                      123 Coating Street
-                      <br />
-                      Industrial District
-                      <br />
-                      City, State 12345
-                    </p>
-                    <button
-                      onClick={handleGetDirections}
-                      className="mt-2 text-orange-500 hover:text-orange-600 font-medium"
-                    >
-                      Get Directions →
-                    </button>
-                  </div>
-                </div>
-
-                <div className="contact-info-item">
-                  <div className="contact-icon-wrapper">
-                    <Clock className="contact-icon" />
-                  </div>
-                  <div>
-                    <h4 className="contact-text-primary">Business Hours</h4>
-                    <p className="contact-text-secondary">
-                      Monday - Friday: 8:00 AM - 6:00 PM
-                      <br />
-                      Saturday: 9:00 AM - 2:00 PM
-                      <br />
-                      Sunday: Closed
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Contact Options */}
-            <div className="contact-info-card">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                Quick Contact
-              </h3>
-              <div className="quick-contact-grid">
-                <a
-                  href="https://wa.me/1234567890"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="quick-contact-button whatsapp"
-                >
-                  <MessageCircle className="w-5 h-5 mr-2" />
-                  WhatsApp Chat
-                </a>
-                <a
-                  href="https://m.me/yourpage"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="quick-contact-button messenger"
-                >
-                  <MessageSquare className="w-5 h-5 mr-2" />
-                  Messenger
-                </a>
-              </div>
-            </div>
-
-            {/* Map */}
-            <div className="contact-info-card">
-              <iframe
-                title="Business Location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3024.2219901290355!2d-74.00369368400567!3d40.71312937933185!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25a23e28c1191%3A0x49f75d3281df052a!2s150%20Park%20Row%2C%20New%20York%2C%20NY%2010007!5e0!3m2!1sen!2sus!4v1644262070010!5m2!1sen!2sus"
-                className="map-container"
-                allowFullScreen
-              />
-            </div>
-          </div>
-
-          {/* Contact Form */}
-          <div className="form-container">
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-              Send us a Message
-            </h3>
-            <form onSubmit={handleSubmit} className="form-group">
-              <div>
-                <label htmlFor="name" className="form-label">
-                  Full Name *
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className={`form-input ${
-                    errors.name ? 'error' : 'valid'
-                  }`}
-                />
-                {errors.name && (
-                  <p className="error-message">{errors.name}</p>
-                )}
-              </div>
-
-              <div>
-                <label htmlFor="email" className="form-label">
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={`form-input ${
-                    errors.email ? 'error' : 'valid'
-                  }`}
-                />
-                {errors.email && (
-                  <p className="error-message">{errors.email}</p>
-                )}
-              </div>
-
-              <div>
-                <label htmlFor="phone" className="form-label">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="form-input"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="subject" className="form-label">
-                  Subject *
-                </label>
-                <select
-                  id="subject"
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleChange}
-                  className="form-input"
-                >
-                  <option value="">Select a subject</option>
-                  {subjectOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
+                      <motion.div 
+                        className="flex-shrink-0 p-3 bg-orange-500/10 rounded-lg"
+                        variants={iconContainerVariants}
+                      >
+                        <Icon className="w-6 h-6 text-orange-500" />
+                      </motion.div>
+                      <div>
+                        <h4 className="text-lg font-medium text-white mb-1">{title}</h4>
+                        {href ? (
+                          <a 
+                            href={href}
+                            className="text-gray-300 hover:text-orange-400 transition-colors duration-200 whitespace-pre-line"
+                          >
+                            {content}
+                          </a>
+                        ) : (
+                          <p className="text-gray-300 whitespace-pre-line">{content}</p>
+                        )}
+                        {title === 'Location' && (
+                          <InteractiveButton
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleGetDirections}
+                            icon={<ArrowRight className="w-4 h-4" />}
+                            className="mt-2 text-orange-400 hover:text-orange-500"
+                          >
+                            Get Directions
+                          </InteractiveButton>
+                        )}
+                      </div>
+                    </motion.div>
                   ))}
-                </select>
-                {errors.subject && (
-                  <p className="error-message">{errors.subject}</p>
-                )}
-              </div>
+                </CardContent>
+              </Card>
+            </TiltCard>
 
-              <div>
-                <label htmlFor="message" className="form-label">
-                  Message *
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  rows={6}
-                  className="form-input"
-                />
-                {errors.message && (
-                  <p className="error-message">{errors.message}</p>
-                )}
-              </div>
+            {/* Map Section */}
+            <TiltCard>
+              <Card className="glass-card bg-gray-900/50 backdrop-blur-xl border border-gray-800 overflow-hidden">
+                <CardContent className="p-0">
+                  <div ref={iframeContainerRef} className="aspect-video relative">
+                    {(shouldLoadIframe || iframeLoaded) ? (
+                      <iframe
+                        ref={iframeRef}
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3000!2d-73.9877!3d40.7484!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zM40zMCcwNC44Ik4gNzPCsDU5JzE1LjciVw!5e0!3m2!1sen!2sus!4v1234567890&mode=dark"
+                        className="absolute inset-0 w-full h-full rounded-lg map-dark transition-opacity duration-300"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        title="Our Location"
+                        onLoad={() => setIframeLoaded(true)}
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center bg-gray-800 rounded-lg">
+                        <div className="text-center">
+                          <div className="w-10 h-10 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin mx-auto mb-2" />
+                          <p className="text-sm text-gray-400">Loading map...</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TiltCard>
+          </motion.div>
 
-              <button
-                type="submit"
-                className="submit-button"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Sending...' : 'Send Message'}
-              </button>
-            </form>
-          </div>
+          {/* Contact Form Section */}
+          <motion.div variants={itemVariants}>
+            <TiltCard>
+              <Card className="glass-card bg-gray-900/50 backdrop-blur-xl border border-gray-800">
+                <CardHeader>
+                  <CardTitle className="text-2xl text-white">Send us a Message</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <AnimatePresence mode="wait">
+                      {['name', 'email', 'phone', 'subject', 'message'].map((field) => (
+                        <motion.div
+                          key={field}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.2 }}
+                          className={`expanding-input ${focusedField === field ? 'focused' : ''}`}
+                        >
+                          {field === 'subject' ? (
+                            <Select
+                              label="Subject *"
+                              id={field}
+                              name={field}
+                              value={formData[field as keyof FormData]}
+                              onChange={handleChange}
+                              onFocus={() => handleFocus(field)}
+                              onBlur={() => handleBlur(field)}
+                              error={errors[field]}
+                              className="glass-input"
+                              required
+                            >
+                              <option value="">Select a subject</option>
+                              {subjectOptions.map((option) => (
+                                <option key={option} value={option}>
+                                  {option}
+                                </option>
+                              ))}
+                            </Select>
+                          ) : field === 'message' ? (
+                            <TextArea
+                              label="Message *"
+                              id={field}
+                              name={field}
+                              value={formData[field as keyof FormData]}
+                              onChange={handleChange}
+                              onFocus={() => handleFocus(field)}
+                              onBlur={() => handleBlur(field)}
+                              error={errors[field]}
+                              rows={6}
+                              className="glass-input"
+                              required
+                            />
+                          ) : (
+                            <Input
+                              label={`${field.charAt(0).toUpperCase() + field.slice(1)}${field !== 'phone' ? ' *' : ''}`}
+                              type={field === 'email' ? 'email' : 'text'}
+                              id={field}
+                              name={field}
+                              value={formData[field as keyof FormData]}
+                              onChange={handleChange}
+                              onFocus={() => handleFocus(field)}
+                              onBlur={() => handleBlur(field)}
+                              error={errors[field]}
+                              className="glass-input"
+                              required={field !== 'phone'}
+                            />
+                          )}
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+
+                    <motion.div 
+                      className="pt-4"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.3 }}
+                    >
+                      <InteractiveButton
+                        type="submit"
+                        variant="primary"
+                        size="lg"
+                        loading={isSubmitting}
+                        className="w-full glass-effect bg-gradient-to-r from-orange-500 to-orange-600
+                          hover:from-orange-600 hover:to-orange-700 shadow-lg shadow-orange-500/20"
+                        icon={<ArrowRight className="w-5 h-5" />}
+                      >
+                        {isSubmitting ? 'Sending...' : 'Send Message'}
+                      </InteractiveButton>
+                    </motion.div>
+                  </form>
+                </CardContent>
+              </Card>
+            </TiltCard>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

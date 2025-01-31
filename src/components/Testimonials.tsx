@@ -1,6 +1,11 @@
-import { Star, Youtube, Play } from 'lucide-react';
+import { Star, Youtube, Play, X, Upload } from 'lucide-react';
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import Button, { InteractiveButton } from './ui/Button';
+import Card, { CardHeader, CardContent, CardFooter, CardTitle } from './ui/Card';
+import Input from './ui/Input';
+import { TextArea } from './ui/Input';
+import Select from './ui/Select';
 
 interface Testimonial {
   id: number;
@@ -54,9 +59,51 @@ const testimonials: Testimonial[] = [
 
 const projectTypes = ['All', 'Automotive', 'Industrial', 'Custom'];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: "easeOut"
+    }
+  }
+};
+
+const modalVariants = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      type: "spring",
+      duration: 0.5
+    }
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.9,
+    transition: {
+      duration: 0.3
+    }
+  }
+};
+
 export default function Testimonials() {
   const [selectedType, setSelectedType] = useState('All');
   const [showReviewForm, setShowReviewForm] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [formData, setFormData] = useState<ReviewFormData>({
     name: '',
     rating: 5,
@@ -83,246 +130,365 @@ export default function Testimonials() {
   };
 
   return (
-    <section className="py-24 section-pattern">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4 hero-title">
+    <section className="py-24 bg-gradient-to-b from-gray-900 to-gray-800 relative overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-grid-pattern opacity-5" />
+        <div className="absolute inset-0 bg-gradient-radial from-orange-500/5 via-transparent to-transparent" />
+      </div>
+
+      <motion.div 
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div variants={itemVariants} className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent 
+            bg-gradient-to-r from-orange-400 to-orange-600 mb-6
+            [text-shadow:_0_2px_10px_rgba(251,146,60,0.3)]">
             Client Testimonials
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-8 hero-description">
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-8
+            [text-shadow:_0_1px_5px_rgba(255,255,255,0.1)]">
             Don't just take our word for it. Here's what our clients have to say
             about our powder coating services.
           </p>
 
-          <div className="flex justify-center gap-2 mb-8">
+          <motion.div 
+            variants={itemVariants}
+            className="flex flex-wrap justify-center gap-3 mb-8"
+          >
             {projectTypes.map((type) => (
-              <button
+              <InteractiveButton
                 key={type}
                 onClick={() => setSelectedType(type)}
-                className={`px-4 py-2 rounded-full transition-colors ${
-                  selectedType === type
-                    ? 'bg-orange-500 text-white'
-                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-gray-700'
-                }`}
-                title={`Filter by ${type} projects`}
-                aria-label={`Filter testimonials by ${type} projects`}
+                variant={selectedType === type ? 'primary' : 'ghost'}
+                size="sm"
+                className={`glass-panel px-6 py-2 rounded-xl transition-all duration-300
+                  ${selectedType === type 
+                    ? 'bg-orange-500/20 text-orange-400 border-orange-500/30' 
+                    : 'hover:bg-gray-800/50'}`}
               >
                 {type}
-              </button>
+              </InteractiveButton>
             ))}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredTestimonials.map((testimonial) => (
-            <motion.div
-              key={testimonial.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="glass-effect dark:glass-effect-dark rounded-2xl p-6"
-            >
-              <div className="flex items-center space-x-4 mb-4">
-                <img
-                  src={testimonial.image}
-                  alt={testimonial.name}
-                  className="w-12 h-12 rounded-full object-cover"
-                />
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                    {testimonial.name}
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {testimonial.role}
-                  </p>
-                  <span className="inline-block px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-xs mt-1">
-                    {testimonial.projectType}
-                  </span>
-                </div>
-              </div>
-              <div className="flex mb-3">
-                {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className="w-4 h-4 text-yellow-400 fill-current"
-                  />
-                ))}
-              </div>
-              <p className="text-gray-700 dark:text-gray-300 text-sm">
-                "{testimonial.content}"
-              </p>
-              {testimonial.videoUrl && (
-                <button 
-                  className="mt-4 flex items-center text-accent"
-                  title="Watch video testimonial"
-                  aria-label={`Watch video testimonial from ${testimonial.name}`}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={selectedType}
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          >
+            {filteredTestimonials.map((testimonial) => (
+              <motion.div
+                key={testimonial.id}
+                variants={itemVariants}
+                className="h-full"
+              >
+                <Card 
+                  variant="hover" 
+                  className="h-full glass-panel bg-gray-900/50 backdrop-blur-xl
+                    border border-gray-800 hover:border-orange-500/30 transition-all duration-500
+                    hover:shadow-xl hover:shadow-orange-500/10"
                 >
-                  <Play className="w-4 h-4 mr-2" />
-                  Watch Video Review
-                </button>
-              )}
-            </motion.div>
-          ))}
-        </div>
+                  <CardHeader>
+                    <div className="flex items-center space-x-4">
+                      <div className="relative group">
+                        <img
+                          src={testimonial.image}
+                          alt={testimonial.name}
+                          className="w-12 h-12 rounded-full object-cover ring-2 ring-orange-500/30
+                            transition-all duration-300 group-hover:ring-orange-500"
+                        />
+                        <motion.div
+                          className="absolute inset-0 bg-orange-500/10 rounded-full"
+                          animate={{
+                            scale: [1, 1.2, 1],
+                            opacity: [0, 0.5, 0]
+                          }}
+                          transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                            repeatDelay: 1
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <CardTitle className="text-gray-100">{testimonial.name}</CardTitle>
+                        <p className="text-sm text-gray-400">
+                          {testimonial.role}
+                        </p>
+                        <span className="inline-block px-3 py-1 bg-orange-500/10 text-orange-400
+                          rounded-full text-xs mt-1 border border-orange-500/20">
+                          {testimonial.projectType}
+                        </span>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex mb-3">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className="w-4 h-4 text-yellow-400 fill-current"
+                        />
+                      ))}
+                    </div>
+                    <p className="text-gray-300 text-sm italic">
+                      "{testimonial.content}"
+                    </p>
+                  </CardContent>
+                  {testimonial.videoUrl && (
+                    <CardFooter>
+                      <Button 
+                        variant="ghost"
+                        size="sm"
+                        icon={<Play className="w-4 h-4" />}
+                        onClick={() => testimonial.videoUrl && setSelectedVideo(testimonial.videoUrl)}
+                        className="hover:bg-orange-500/10 hover:text-orange-400
+                          transition-all duration-300"
+                        title="Watch video testimonial"
+                        aria-label={`Watch video testimonial from ${testimonial.name}`}
+                      >
+                        Watch Video Review
+                      </Button>
+                    </CardFooter>
+                  )}
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+        </AnimatePresence>
 
-        <div className="mt-16 text-center">
-          <button
+        <motion.div variants={itemVariants} className="mt-16 text-center">
+          <InteractiveButton
             onClick={() => setShowReviewForm(true)}
-            className="bg-accent text-white px-6 py-3 rounded-lg shadow-lg hover:bg-accent/90 transition-colors"
-            title="Share your experience"
-            aria-label="Open review submission form"
+            variant="primary"
+            size="lg"
+            className="glass-panel bg-orange-500/20 hover:bg-orange-500/30
+              backdrop-blur-lg shadow-lg shadow-orange-500/10"
           >
             Share Your Experience
-          </button>
-        </div>
+          </InteractiveButton>
+        </motion.div>
 
-        {/* Trust Badges Section */}
-        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8">
-          <div className="flex flex-col items-center">
-            <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mb-4">
-              <Star className="w-8 h-8 text-accent" />
-            </div>
-            <h3 className="font-bold text-gray-900 dark:text-white">Verified Business</h3>
-          </div>
-          <div className="flex flex-col items-center">
-            <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mb-4">
-              <Star className="w-8 h-8 text-accent" />
-            </div>
-            <h3 className="font-bold text-gray-900 dark:text-white">100% Satisfaction</h3>
-          </div>
-          <div className="flex flex-col items-center">
-            <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mb-4">
-              <Star className="w-8 h-8 text-accent" />
-            </div>
-            <h3 className="font-bold text-gray-900 dark:text-white">Eco-Friendly</h3>
-          </div>
-          <div className="flex flex-col items-center">
-            <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mb-4">
-              <Youtube className="w-8 h-8 text-accent" />
-            </div>
-            <h3 className="font-bold text-gray-900 dark:text-white">Video Reviews</h3>
-          </div>
-        </div>
+        {/* Enhanced Trust Badges Section */}
+        <motion.div 
+          variants={containerVariants}
+          className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8"
+        >
+          {[
+            { icon: Star, title: 'Verified Business', color: 'blue' },
+            { icon: Star, title: '100% Satisfaction', color: 'green' },
+            { icon: Star, title: 'Eco-Friendly', color: 'purple' },
+            { icon: Youtube, title: 'Video Reviews', color: 'orange' }
+          ].map((badge) => (
+            <motion.div
+              key={badge.title}
+              variants={itemVariants}
+              className="flex flex-col items-center group"
+            >
+              <div className={`w-16 h-16 bg-${badge.color}-500/10 rounded-full flex items-center 
+                justify-center mb-4 transition-all duration-300 group-hover:scale-110
+                group-hover:bg-${badge.color}-500/20`}>
+                <badge.icon className={`w-8 h-8 text-${badge.color}-500`} />
+              </div>
+              <h3 className="font-bold text-gray-100 group-hover:text-orange-400
+                transition-colors duration-300">{badge.title}</h3>
+            </motion.div>
+          ))}
+        </motion.div>
 
-        {/* Review Submission Modal */}
-        {showReviewForm && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-lg w-full mx-4">
-              <h3 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
-                Share Your Experience
-              </h3>
-              <form onSubmit={handleSubmitReview} className="space-y-4">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium mb-2">Name</label>
-                  <input
-                    id="name"
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    placeholder="Enter your name"
-                    title="Your name"
-                    className="w-full px-4 py-2 rounded-lg border dark:bg-gray-700"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Rating</label>
-                  <div className="flex gap-2">
-                    {[1, 2, 3, 4, 5].map((rating) => (
-                      <button
-                        key={rating}
-                        type="button"
-                        title={`Rate ${rating} stars`}
-                        aria-label={`Rate ${rating} stars`}
-                        onClick={() =>
-                          setFormData({ ...formData, rating: rating })
+        {/* Enhanced Review Modal */}
+        <AnimatePresence>
+          {showReviewForm && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center 
+                justify-center z-50 p-4"
+            >
+              <motion.div
+                variants={modalVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="max-w-lg w-full"
+              >
+                <Card className="glass-panel bg-gray-900/90 border border-gray-800">
+                  <CardHeader className="relative">
+                    <CardTitle className="text-gray-100">Share Your Experience</CardTitle>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowReviewForm(false)}
+                      className="absolute right-4 top-4 hover:bg-orange-500/10
+                        hover:text-orange-400 transition-all duration-300"
+                      aria-label="Close review form"
+                    >
+                      <X className="w-5 h-5" />
+                    </Button>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleSubmitReview} className="space-y-6">
+                      <Input
+                        label="Name"
+                        id="name"
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) =>
+                          setFormData({ ...formData, name: e.target.value })
                         }
-                        className={`p-2 ${
-                          formData.rating >= rating
-                            ? 'text-yellow-400'
-                            : 'text-gray-300'
-                        }`}
+                        placeholder="Enter your name"
+                        title="Your name"
+                        fullWidth
+                        required
+                        className="glass-input"
+                      />
+
+                      <div>
+                        <label className="block text-sm font-medium mb-2 text-gray-200">
+                          Rating
+                        </label>
+                        <div className="flex gap-2">
+                          {[1, 2, 3, 4, 5].map((rating) => (
+                            <Button
+                              key={rating}
+                              type="button"
+                              variant={formData.rating >= rating ? 'primary' : 'ghost'}
+                              size="sm"
+                              onClick={() =>
+                                setFormData({ ...formData, rating: rating })
+                              }
+                              className={`transition-all duration-300 ${
+                                formData.rating >= rating 
+                                  ? 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30'
+                                  : 'hover:bg-gray-800/50'
+                              }`}
+                            >
+                              <Star className={`w-5 h-5 ${
+                                formData.rating >= rating ? 'fill-current' : ''
+                              }`} />
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <TextArea
+                        label="Your Review"
+                        id="content"
+                        value={formData.content}
+                        onChange={(e) =>
+                          setFormData({ ...formData, content: e.target.value })
+                        }
+                        placeholder="Share your experience with our services..."
+                        rows={4}
+                        required
+                        className="glass-input"
+                      />
+
+                      <Select
+                        label="Project Type"
+                        id="projectType"
+                        value={formData.projectType}
+                        onChange={(e) =>
+                          setFormData({ ...formData, projectType: e.target.value })
+                        }
+                        required
+                        className="glass-input"
                       >
-                        <Star className="w-6 h-6 fill-current" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <label htmlFor="projectType" className="block text-sm font-medium mb-2">
-                    Project Type
-                  </label>
-                  <select
-                    id="projectType"
-                    value={formData.projectType}
-                    onChange={(e) =>
-                      setFormData({ ...formData, projectType: e.target.value })
-                    }
-                    title="Select project type"
-                    className="w-full px-4 py-2 rounded-lg border dark:bg-gray-700"
-                  >
-                    {projectTypes.slice(1).map((type) => (
-                      <option key={type} value={type}>
-                        {type}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label htmlFor="review" className="block text-sm font-medium mb-2">Review</label>
-                  <textarea
-                    id="review"
-                    value={formData.content}
-                    onChange={(e) =>
-                      setFormData({ ...formData, content: e.target.value })
-                    }
-                    placeholder="Share your experience with our service"
-                    title="Your review"
-                    className="w-full px-4 py-2 rounded-lg border dark:bg-gray-700 h-32"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="photo" className="block text-sm font-medium mb-2">
-                    Upload Photo (Optional)
-                  </label>
-                  <input
-                    id="photo"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        image: e.target.files?.[0],
-                      })
-                    }
-                    title="Upload a photo"
-                    className="w-full"
-                  />
-                </div>
-                <div className="flex justify-end gap-4 mt-8">
-                  <button
-                    type="button"
-                    onClick={() => setShowReviewForm(false)}
-                    className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700"
-                    title="Cancel review submission"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 rounded-lg bg-accent text-white"
-                    title="Submit your review"
-                  >
-                    Submit Review
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-      </div>
+                        {projectTypes.filter(type => type !== 'All').map(type => (
+                          <option key={type} value={type}>{type}</option>
+                        ))}
+                      </Select>
+
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-200">
+                          Add Photos (optional)
+                        </label>
+                        <div className="flex items-center justify-center w-full">
+                          <label className="w-full flex flex-col items-center justify-center px-4 py-6 
+                            bg-gray-800/50 text-gray-400 rounded-lg border-2 border-dashed
+                            border-gray-700 cursor-pointer hover:bg-gray-800/70 transition-all duration-300">
+                            <Upload className="w-8 h-8 mb-2" />
+                            <span className="text-sm">Click to upload photos</span>
+                            <input type="file" className="hidden" accept="image/*" multiple />
+                          </label>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end gap-3">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={() => setShowReviewForm(false)}
+                          className="hover:bg-gray-800/50"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="submit"
+                          variant="primary"
+                          className="bg-orange-500/20 hover:bg-orange-500/30
+                            text-orange-400 shadow-lg shadow-orange-500/10"
+                        >
+                          Submit Review
+                        </Button>
+                      </div>
+                    </form>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Video Modal */}
+        <AnimatePresence>
+          {selectedVideo && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/90 backdrop-blur-xl flex items-center 
+                justify-center z-50 p-4"
+            >
+              <motion.div
+                variants={modalVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="max-w-4xl w-full aspect-video relative"
+              >
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedVideo(null)}
+                  className="absolute -top-12 right-0 hover:bg-orange-500/10
+                    hover:text-orange-400 transition-all duration-300"
+                  aria-label="Close video"
+                >
+                  <X className="w-5 h-5" />
+                </Button>
+                <iframe
+                  src={selectedVideo}
+                  className="w-full h-full rounded-xl"
+                  title="Customer testimonial video"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </section>
   );
 }

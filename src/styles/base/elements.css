@@ -1,0 +1,245 @@
+/* Base element styles */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  font-family: 'Inter', theme('fontFamily.sans');
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-primary);
+  background-image: linear-gradient(
+    to bottom,
+    var(--bg-primary),
+    var(--bg-secondary)
+  );
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', theme('fontFamily.sans');
+  color: var(--text-primary);
+  line-height: 1.2;
+  margin-bottom: 0.75em;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+h1 {
+  font-size: 3.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+h2 {
+  font-size: 2.5rem;
+  font-weight: 600;
+}
+
+h3 {
+  font-size: 2rem;
+}
+
+p {
+  color: var(--text-secondary);
+  margin-bottom: 1.25em;
+  line-height: 1.7;
+}
+
+/* Links */
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+a:hover {
+  color: var(--accent-hover);
+}
+
+a.underline-effect {
+  position: relative;
+}
+
+a.underline-effect::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+  background-color: var(--accent-color);
+  transition: width 0.3s ease;
+}
+
+a.underline-effect:hover::after {
+  width: 100%;
+}
+
+/* Form elements */
+input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--glass-border);
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 
+    0 0 0 2px rgba(var(--accent-rgb), 0.2),
+    0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Button base styles */
+button {
+  font-family: inherit;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  background-color: var(--accent-color);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.3);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* Lists */
+ul, ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1.25em;
+}
+
+li {
+  margin-bottom: 0.5em;
+}
+
+/* Images */
+img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+/* Card base styles */
+.card {
+  background: var(--bg-card);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--glass-border);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Section styles */
+section {
+  padding: 5rem 0;
+  position: relative;
+}
+
+/* Container styles */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* Grid styles */
+.grid {
+  display: grid;
+  gap: 2rem;
+}
+
+/* Flex styles */
+.flex {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Glassmorphism base */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Service Card Styles */
+.service-card-animation {
+  transition-property: all;
+  transition-duration: 0.3s;
+  transition-delay: var(--animation-delay, 0s);
+}
+
+.service-card-feature {
+  opacity: 0;
+  transform: translateY(1rem);
+  transition: all 0.3s ease;
+}
+
+.service-card:hover .service-card-feature {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.service-card-image {
+  transition: all 0.7s ease;
+}
+
+.service-card:hover .service-card-image {
+  transform: scale(1.1);
+  filter: blur(4px);
+}
+
+.service-card-overlay {
+  transition: opacity 0.5s ease;
+}
+
+.service-card:hover .service-card-overlay {
+  opacity: 0.95;
+}
+
+/* Service Grid Animation */
+.service-grid-item {
+  opacity: 0;
+  transform: translateY(2rem);
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+} 

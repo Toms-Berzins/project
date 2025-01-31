@@ -1,7 +1,6 @@
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import ThemeToggle from './ThemeToggle';
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
@@ -62,7 +61,6 @@ export default function Navigation() {
                 </Link>
               )
             ))}
-            <ThemeToggle />
             <Link
               to="/quote"
               className="bg-[#ED8936] text-white px-4 py-2 rounded-lg hover:bg-[#DD7926] transition-colors"
@@ -72,7 +70,6 @@ export default function Navigation() {
           </div>
 
           <div className="md:hidden flex items-center space-x-4">
-            <ThemeToggle />
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="text-gray-700 dark:text-gray-300"

@@ -1,0 +1,22 @@
+.rippleContainer {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  top: var(--ripple-y);
+  left: var(--ripple-x);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  animation: ripple 1s ease-out forwards;
+}
+
+@keyframes ripple {
+  from {
+    transform: translate(-50%, -50%) scale(0);
+  }
+  to {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+} 

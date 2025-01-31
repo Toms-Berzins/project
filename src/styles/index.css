@@ -1,0 +1,14 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+@import './contact.css';
+
+/* Custom styles and overrides */
+.card-3d {
+  transform-style: preserve-3d;
+  transform-perspective: 1000px;
+}
+
+.hero-gradient {
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.3));
+} 
