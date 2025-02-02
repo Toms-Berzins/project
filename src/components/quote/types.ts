@@ -14,7 +14,7 @@ export interface FormData {
     type: string;
     custom?: string;
   };
-  quantity: string;
+  quantity: number;
   addons: string[];
   specialRequirements: string;
   contact: {
@@ -34,7 +34,25 @@ export interface PriceBreakdown {
   total: number;
 }
 
-export type FormDataValue = string | string[] | boolean | number;
+export type FormDataValue = 
+  | string 
+  | string[] 
+  | number 
+  | {
+      length?: string;
+      width?: string;
+      height?: string;
+      unit?: 'inches' | 'cm';
+    }
+  | {
+      type?: string;
+      finish?: string;
+    }
+  | {
+      type?: string;
+      custom?: string;
+    };
+
 export type NestedFormData = {
   [key: string]: FormDataValue | NestedFormData;
 }; 

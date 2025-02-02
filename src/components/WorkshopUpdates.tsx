@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import Button from './ui/Button';
 import Card, { CardContent } from './ui/Card';
-import SocialFeed from './blog/SocialFeed';
+import SocialFeed from './SocialFeed';
 
 const staggerChildren = {
   initial: { opacity: 0 },
@@ -47,16 +47,20 @@ export default function WorkshopUpdates() {
           viewport={{ once: true }}
         >
           <motion.h2 
-            className="text-4xl font-bold mb-6"
+            className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent 
+              bg-gradient-to-r from-orange-400 to-orange-600 mb-6
+              [text-shadow:_0_2px_10px_rgba(251,146,60,0.3)]"
             variants={fadeInUp}
           >
             Latest From Our Workshop
           </motion.h2>
           <motion.p 
-            className="text-lg max-w-2xl mx-auto"
+            className="text-xl text-gray-300/90 max-w-2xl mx-auto
+              [text-shadow:_0_1px_5px_rgba(255,255,255,0.1)]"
             variants={fadeInUp}
           >
-            Stay updated with our recent projects and transformations. Follow us on social media for more inspiration.
+            Stay updated with our recent projects and transformations. 
+            Follow us on social media for more inspiration.
           </motion.p>
         </motion.div>
         

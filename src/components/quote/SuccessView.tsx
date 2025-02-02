@@ -40,10 +40,9 @@ export const SuccessView = ({
         <Download className="w-5 h-5" />
         Download PDF
       </button>
-      
       <button
         onClick={onStartNewQuote}
-        className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+        className="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg transition-colors"
       >
         Start New Quote
       </button>

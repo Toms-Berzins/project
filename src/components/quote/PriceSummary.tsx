@@ -32,9 +32,9 @@ const ADDITIONAL_COSTS = {
 };
 
 const formatPrice = (amount: number) => {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('de-DE', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'EUR',
     minimumFractionDigits: 2,
   }).format(amount);
 };
@@ -195,7 +195,9 @@ export const PriceSummary = ({
             key={priceBreakdown.total}
             initial={{ scale: 1.1, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="font-bold text-lg text-accent"
+            className={`font-bold text-lg ${
+              basePrice > 0 && quantity > 0 && items.length > 0 ? 'text-orange-600' : 'text-gray-600'
+            }`}
           >
             {formatPrice(priceBreakdown.total)}
           </motion.span>

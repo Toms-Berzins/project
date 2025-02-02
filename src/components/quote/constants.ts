@@ -48,7 +48,7 @@ export const initialFormData = {
   color: {
     type: '',
   },
-  quantity: '',
+  quantity: 1,
   addons: [],
   specialRequirements: '',
   contact: {

@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { sendQuoteEmail } from '../services/emailService';
 import { saveQuote, API_URL } from '../services/databaseService';
-import { FormData, PriceBreakdown, FormDataValue } from './quote/types';
+import { FormData, PriceBreakdown, FormDataValue, NestedFormData } from './quote/types';
 import { initialFormData, materials, coatingTypes, finishTypes, colors, addons } from './quote/constants';
 import { StepIndicator } from './quote/StepIndicator';
 import { MaterialStep } from './quote/steps/MaterialStep';
@@ -19,12 +19,11 @@ export default function QuoteCalculator() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [priceBreakdown, setPriceBreakdown] = useState<PriceBreakdown | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [quoteReference, setQuoteReference] = useState<string | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
 
   const calculateEstimate = () => {
     const material = materials.find(m => m.id === formData.material);
@@ -46,7 +45,7 @@ export default function QuoteCalculator() {
     const coatingPrice = basePrice * coating.priceMultiplier;
     const finishPrice = finish.priceAdd;
     const colorMultiplier = color.priceMultiplier;
-    const quantity = parseInt(formData.quantity);
+    const quantity = formData.quantity;
 
     const addonsTotal = formData.addons.reduce((total, addonId) => {
       const addon = addons.find(a => a.id === addonId);
@@ -87,7 +86,7 @@ export default function QuoteCalculator() {
         if (formData.color.type === 'custom' && !formData.color.custom) {
           newErrors.customColor = 'Please specify custom color';
         }
-        if (!formData.quantity || parseInt(formData.quantity) < 1) {
+        if (!formData.quantity || formData.quantity < 1) {
           newErrors.quantity = 'Please enter a valid quantity';
         }
         break;
@@ -108,16 +107,28 @@ export default function QuoteCalculator() {
       const fieldParts = field.split('.');
       
       if (fieldParts.length === 1) {
+        // Handle quantity field specially
+        if (field === 'quantity') {
+          const numValue = typeof value === 'string' ? parseInt(value) || 1 : 
+                          typeof value === 'number' ? value : 1;
+          return {
+            ...prev,
+            quantity: numValue
+          };
+        }
         return {
           ...prev,
           [field]: value
         };
       }
 
-      let current: Record<string, unknown> = newData;
+      let current: NestedFormData = newData;
       for (let i = 0; i < fieldParts.length - 1; i++) {
         const part = fieldParts[i];
-        current = current[part] as Record<string, unknown>;
+        if (!(part in current)) {
+          current[part] = {};
+        }
+        current = current[part] as NestedFormData;
       }
       
       const lastPart = fieldParts[fieldParts.length - 1];
@@ -173,7 +184,7 @@ export default function QuoteCalculator() {
       const data = await response.json();
       setUserId(data.user._id);
       setShowLoginModal(false);
-      setErrorMessage(null);
+      setErrorMessage(undefined);
       return data;
     } catch (error) {
       setErrorMessage(createErrorMessage(error));
@@ -199,7 +210,7 @@ export default function QuoteCalculator() {
       const data = await response.json();
       setUserId(data.user._id);
       setShowLoginModal(false);
-      setErrorMessage(null);
+      setErrorMessage(undefined);
       return data;
     } catch (error) {
       setErrorMessage(createErrorMessage(error));
@@ -229,7 +240,7 @@ export default function QuoteCalculator() {
           window.removeEventListener('message', handleMessage);
           setUserId(event.data.user._id);
           setShowLoginModal(false);
-          setErrorMessage(null);
+          setErrorMessage(undefined);
         }
       };
 
@@ -241,8 +252,7 @@ export default function QuoteCalculator() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setErrorMessage(null);
+    setErrorMessage(undefined);
 
     try {
       if (!userId) {
@@ -262,8 +272,6 @@ export default function QuoteCalculator() {
       setShowSuccess(true);
     } catch (error) {
       setErrorMessage(createErrorMessage(error));
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -280,8 +288,12 @@ export default function QuoteCalculator() {
           {currentStep === 1 && (
             <MaterialStep
               formData={formData}
-              errors={errors}
-              updateFormData={updateFormData}
+              onNext={handleNext}
+              onChange={(data) => {
+                Object.entries(data).forEach(([key, value]) => {
+                  updateFormData(key, value);
+                });
+              }}
             />
           )}
 
@@ -290,6 +302,7 @@ export default function QuoteCalculator() {
               formData={formData}
               errors={errors}
               updateFormData={updateFormData}
+              onNext={handleNext}
             />
           )}
 
@@ -298,6 +311,7 @@ export default function QuoteCalculator() {
               formData={formData}
               errors={errors}
               updateFormData={updateFormData}
+              onNext={handleNext}
             />
           )}
 
@@ -305,8 +319,8 @@ export default function QuoteCalculator() {
             <ContactStep
               formData={formData}
               errors={errors}
-              priceBreakdown={priceBreakdown}
               updateFormData={updateFormData}
+              onNext={handleSubmit}
             />
           )}
         </motion.div>
@@ -353,38 +367,17 @@ export default function QuoteCalculator() {
         <>
           <StepIndicator currentStep={currentStep} />
           <form onSubmit={handleSubmit} className="mt-8">
-            {renderStep()}
-            <div className="mt-8 flex justify-between">
-              {currentStep > 1 && (
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  className="flex items-center text-gray-600 hover:text-gray-800"
-                >
-                  <ArrowLeft className="mr-2" />
-                  Back
-                </button>
-              )}
+            {currentStep > 1 && (
               <button
                 type="button"
-                onClick={currentStep < 4 ? handleNext : handleSubmit}
-                disabled={isSubmitting}
-                className={`flex items-center ${
-                  currentStep === 4
-                    ? 'bg-green-600 hover:bg-green-700'
-                    : 'bg-blue-600 hover:bg-blue-700'
-                } text-white px-6 py-2 rounded-lg ml-auto transition-colors`}
+                onClick={handleBack}
+                className="flex items-center bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg transition-colors mb-8"
               >
-                {isSubmitting ? (
-                  <Loader2 className="animate-spin mr-2" />
-                ) : (
-                  <>
-                    {currentStep === 4 ? 'Submit Quote' : 'Next'}
-                    <ArrowRight className="ml-2" />
-                  </>
-                )}
+                <ArrowLeft className="mr-2" />
+                Back
               </button>
-            </div>
+            )}
+            {renderStep()}
           </form>
         </>
       )}

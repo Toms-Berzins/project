@@ -2,7 +2,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useMemo } from 'react';
 import { Search, Lightbulb } from 'lucide-react';
 import Accordion from './ui/Accordion';
-import Particles from './effects/Particles';
 import { faqs, categoryColors } from './FAQ/faq.data';
 import { CategoryIcon } from './FAQ/CategoryIcon';
 import Input from './ui/Input';
@@ -160,10 +159,7 @@ const FAQ = () => {
 
   return (
     <section className="relative py-24 bg-gradient-to-b from-gray-900 to-gray-800 overflow-hidden">
-      <div className="absolute inset-0">
-        <Particles />
-        <div className="absolute inset-0 bg-gradient-radial from-orange-500/5 via-transparent to-transparent" />
-      </div>
+      <div className="absolute inset-0 bg-gradient-radial from-orange-500/5 via-transparent to-transparent" />
       
       <motion.div 
         variants={containerVariants}
