@@ -14,6 +14,72 @@ const useIsTouchDevice = () => {
   return isTouch;
 };
 
+// Floating background elements for visual interest
+const FloatingBackground = () => {
+  const prefersReducedMotion = useReducedMotion();
+  const elements = Array.from({ length: 3 }, (_, i) => i);
+
+  if (prefersReducedMotion) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
+    >
+      {elements.map((i) => (
+        <motion.div
+          key={i}
+          className="absolute w-[300px] h-[300px] rounded-full pointer-events-none"
+          style={{
+            background: 'radial-gradient(circle, rgba(251,146,60,0.03) 0%, transparent 70%)',
+            top: `${20 + i * 30}%`,
+            left: `${20 + i * 25}%`,
+          }}
+          animate={{
+            y: [0, -20, 0],
+            opacity: [0.5, 0.8, 0.5],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{
+            duration: 6 + i * 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: i * 2,
+          }}
+        />
+      ))}
+    </motion.div>
+  );
+};
+
+// Progressive text reveal component
+interface ProgressiveTextProps {
+  children: React.ReactNode;
+  className?: string;
+  delay?: number;
+}
+
+const ProgressiveText = ({ children, className = "", delay = 0 }: ProgressiveTextProps) => {
+  const prefersReducedMotion = useReducedMotion();
+  
+  return (
+    <motion.div
+      initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{
+        duration: 0.6,
+        delay,
+        ease: [0.43, 0.13, 0.23, 0.96]
+      }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
 interface ServiceCardProps {
   title: string;
   description: string;
@@ -28,13 +94,13 @@ function ServiceCard({ title, description, icon, features, index }: ServiceCardP
   const isTouch = useIsTouchDevice();
 
   const cardVariants = {
-    hidden: prefersReducedMotion ? {} : { opacity: 0, y: 50 },
+    hidden: prefersReducedMotion ? {} : { opacity: 0, y: 30 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.6,
-        delay: index * (prefersReducedMotion ? 0 : 0.2),
+        duration: 0.5,
+        delay: index * (prefersReducedMotion ? 0 : 0.1),
         ease: [0.43, 0.13, 0.23, 0.96]
       }
     }
@@ -57,32 +123,44 @@ function ServiceCard({ title, description, icon, features, index }: ServiceCardP
       variants={cardVariants}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, margin: "-50px" }}
+      viewport={{ once: true, margin: "-20px" }}
       layoutId={`service-card-${index}`}
-      className="touch-manipulation"
+      className="touch-manipulation w-full"
       onTouchStart={() => isTouch && setIsHovered(true)}
       onTouchEnd={() => isTouch && setIsHovered(false)}
     >
       <Card 
         variant="hover" 
-        className="group h-full service-card hover-lift bg-gray-800/50"
+        className="group h-full service-card hover-lift bg-gray-800/50 shadow-md sm:shadow-lg 
+          border border-gray-700/30 rounded-xl transition-all duration-300
+          hover:shadow-xl hover:border-gray-700/50
+          hover:shadow-orange-500/10 hover:scale-[1.02]
+          before:absolute before:inset-0 before:rounded-xl before:bg-gradient-to-b 
+          before:from-orange-500/0 before:to-orange-500/0 before:opacity-0 
+          before:transition-opacity before:duration-300
+          hover:before:opacity-5"
         onMouseEnter={() => !isTouch && setIsHovered(true)}
         onMouseLeave={() => !isTouch && setIsHovered(false)}
       >
-        <CardContent className="p-4 sm:p-8 h-full flex flex-col min-h-[500px] sm:min-h-[600px]">
+        <CardContent className="p-4 sm:p-6 lg:p-8 h-full flex flex-col min-h-[400px] sm:min-h-[500px] lg:min-h-[600px] relative">
           <motion.div 
-            className="mb-6 sm:mb-8 glass-panel p-4 rounded-xl w-fit"
+            className="mb-4 sm:mb-6 lg:mb-8 glass-panel p-3 sm:p-4 rounded-xl w-fit
+              bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm
+              border border-gray-700/30 relative z-10"
             animate={!prefersReducedMotion ? {
               scale: isHovered ? 1.1 : 1,
               backgroundColor: isHovered ? 'rgba(249, 115, 22, 0.2)' : 'rgba(255, 255, 255, 0.1)'
             } : {}}
             transition={{ duration: 0.3 }}
           >
-            {icon}
+            <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+              {icon}
+            </div>
           </motion.div>
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col relative z-10">
             <motion.h3 
-              className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4"
+              className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-2 sm:mb-3 lg:mb-4
+                [text-shadow:_0_1px_2px_rgba(0,0,0,0.1)]"
               animate={!prefersReducedMotion ? {
                 x: isHovered ? 8 : 0,
                 color: isHovered ? '#fb923c' : '#ffffff'
@@ -92,7 +170,8 @@ function ServiceCard({ title, description, icon, features, index }: ServiceCardP
               {title}
             </motion.h3>
             <motion.p 
-              className="text-gray-300 mb-6 sm:mb-8 h-[60px] sm:h-[72px] line-clamp-3 text-sm sm:text-base"
+              className="text-gray-300 mb-4 sm:mb-6 lg:mb-8 h-auto sm:h-[60px] lg:h-[72px] 
+                line-clamp-3 text-sm sm:text-base"
               animate={!prefersReducedMotion ? {
                 x: isHovered ? 8 : 0
               } : {}}
@@ -101,7 +180,7 @@ function ServiceCard({ title, description, icon, features, index }: ServiceCardP
               {description}
             </motion.p>
             
-            <ul className="space-y-2 mb-6 sm:mb-8 flex-1">
+            <ul className="space-y-2 mb-4 sm:mb-6 lg:mb-8 flex-1">
               {features.map((feature, i) => (
                 <li key={feature} className="text-gray-300 service-card-feature">
                   <AnimatePresence>
@@ -130,8 +209,13 @@ function ServiceCard({ title, description, icon, features, index }: ServiceCardP
 
             <div className="mt-auto">
               <InteractiveButton 
-                className="w-full font-semibold text-white hover:shadow-lg hover:shadow-orange-500/20
-                  rounded-lg transition-shadow duration-300 min-h-[44px]"
+                className="w-full py-3 sm:py-4 font-semibold text-white 
+                  hover:shadow-lg hover:shadow-orange-500/20
+                  active:shadow-md active:scale-[0.98]
+                  rounded-lg transition-all duration-300 
+                  min-h-[50px] sm:min-h-[55px]
+                  bg-gradient-to-r from-orange-500 to-orange-600
+                  border border-orange-500/20"
               >
                 Learn More
               </InteractiveButton>
@@ -263,30 +347,33 @@ export default function Services() {
   ];
 
   return (
-    <section className="relative py-12 sm:py-24 bg-gradient-to-b from-gray-900 to-gray-800">
+    <section className="relative py-8 sm:py-16 lg:py-24 bg-gradient-to-b from-gray-900 to-gray-800 overflow-hidden">
       <div className="absolute inset-0 bg-grid-pattern opacity-5" />
+      <div className="absolute inset-0 bg-gradient-to-b from-gray-900/80 via-transparent to-gray-800/80 pointer-events-none" />
+      <FloatingBackground />
+      <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-orange-500/20 to-transparent" />
+      <div className="absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-transparent via-orange-500/20 to-transparent" />
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div 
-          className="text-center mb-10 sm:mb-16"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <h2 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent 
-            bg-gradient-to-r from-orange-400 to-orange-600 mb-6
-            [text-shadow:_0_2px_10px_rgba(251,146,60,0.3)]">
-            Our Services
-          </h2>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-8
-            [text-shadow:_0_1px_5px_rgba(255,255,255,0.1)]">
-            Discover our comprehensive range of powder coating solutions tailored to your needs.
-          </p>
-        </motion.div>
+        <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+          <ProgressiveText delay={0.2}>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-clip-text text-transparent 
+              bg-gradient-to-r from-orange-400 to-orange-600 mb-4 sm:mb-6
+              [text-shadow:_0_2px_10px_rgba(251,146,60,0.3)]">
+              Our Services
+            </h2>
+          </ProgressiveText>
+          
+          <ProgressiveText delay={0.4} className="max-w-2xl mx-auto">
+            <p className="text-lg sm:text-xl text-gray-300 mb-6 sm:mb-8
+              [text-shadow:_0_1px_5px_rgba(255,255,255,0.1)]">
+              Discover our comprehensive range of powder coating solutions tailored to your needs.
+            </p>
+          </ProgressiveText>
+        </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-8 lg:gap-10">
           {services.map((service, index) => (
-            <div key={service.title}>
+            <div key={service.title} className="w-full">
               <ServiceCard {...service} index={index} />
             </div>
           ))}
