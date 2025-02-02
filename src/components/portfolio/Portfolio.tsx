@@ -7,7 +7,7 @@ import ProjectDetails from './ProjectDetails';
 import { useInView } from 'react-intersection-observer';
 import Button from '../ui/Button';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
-import styles from './styles/Ripple.module.css';
+import styles from '../../styles/utils/ripple.module.css';
 
 type FinishType = 'Glossy' | 'Matte' | 'Metallic' | 'Textured' | 'Custom';
 type Category = 'Automotive' | 'Industrial' | 'Furniture' | 'Custom Projects';
@@ -311,7 +311,10 @@ const Portfolio: React.FC = () => {
                     {ripple && (
                       <span
                         className={styles.rippleContainer}
-                        style={{ '--ripple-x': `${ripple.x}px`, '--ripple-y': `${ripple.y}px` } as React.CSSProperties}
+                        style={{ 
+                          '--ripple-x': `${ripple.x}px`, 
+                          '--ripple-y': `${ripple.y}px` 
+                        } as React.CSSProperties}
                       />
                     )}
                     <span className="relative z-10">{item}</span>
