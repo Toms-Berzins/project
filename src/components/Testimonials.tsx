@@ -130,7 +130,7 @@ export default function Testimonials() {
   };
 
   return (
-    <section className="py-24 bg-gradient-to-b from-gray-900 to-gray-800 relative overflow-hidden">
+    <section className="relative py-24 bg-gray-900 overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-grid-pattern opacity-5" />
@@ -144,13 +144,10 @@ export default function Testimonials() {
         animate="visible"
       >
         <motion.div variants={itemVariants} className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent 
-            bg-gradient-to-r from-orange-400 to-orange-600 mb-6
-            [text-shadow:_0_2px_10px_rgba(251,146,60,0.3)]">
+          <h2 className="title-primary mb-6">
             Client Testimonials
           </h2>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-8
-            [text-shadow:_0_1px_5px_rgba(255,255,255,0.1)]">
+          <p className="subtitle-primary max-w-2xl mx-auto mb-8">
             Don't just take our word for it. Here's what our clients have to say
             about our powder coating services.
           </p>
@@ -167,8 +164,8 @@ export default function Testimonials() {
                 size="sm"
                 className={`glass-panel px-6 py-2 rounded-xl transition-all duration-300
                   ${selectedType === type 
-                    ? 'bg-orange-500/20 text-orange-400 border-orange-500/30' 
-                    : 'hover:bg-gray-800/50'}`}
+                    ? 'button-primary' 
+                    : 'button-secondary'}`}
               >
                 {type}
               </InteractiveButton>

@@ -4,6 +4,7 @@ import { FloatingInput } from '../FloatingInput';
 import { PriceSummary } from '../PriceSummary';
 import { calculateTotal } from '../constants';
 import { useState } from 'react';
+import { ArrowRight } from 'lucide-react';
 
 interface MaterialStepProps {
   onNext: () => void;
@@ -177,10 +178,10 @@ export const MaterialStep = ({ onNext, formData, onChange }: MaterialStepProps) 
 
           {/* Dimensions */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
               Dimensions (mm)
             </label>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
               <FloatingInput
                 type="number"
                 label="Length (mm)"
@@ -191,6 +192,7 @@ export const MaterialStep = ({ onNext, formData, onChange }: MaterialStepProps) 
                 step="1"
                 required
                 error={errors.length}
+                className="py-3 sm:py-2"
               />
               <FloatingInput
                 type="number"
@@ -202,6 +204,7 @@ export const MaterialStep = ({ onNext, formData, onChange }: MaterialStepProps) 
                 step="1"
                 required
                 error={errors.width}
+                className="py-3 sm:py-2"
               />
               <FloatingInput
                 type="number"
@@ -213,6 +216,7 @@ export const MaterialStep = ({ onNext, formData, onChange }: MaterialStepProps) 
                 step="1"
                 required
                 error={errors.height}
+                className="py-3 sm:py-2"
               />
             </div>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -240,37 +244,78 @@ export const MaterialStep = ({ onNext, formData, onChange }: MaterialStepProps) 
 
           {/* Price Summary and Promo Code */}
           <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-            <PriceSummary
-              basePrice={basePrice * surfaceArea}
-              quantity={formData.quantity || 1}
-              items={[
-                {
-                  label: 'Material',
-                  amount: basePrice * surfaceArea,
-                  details: selectedMaterial?.name
-                },
-                {
-                  label: 'Dimensions',
-                  amount: 0,
-                  details: `${length} × ${width} × ${height} mm`
-                }
-              ]}
-              priceBreakdown={priceBreakdown}
-              promoCode={formData.promoCode}
-              onApplyPromo={(code) => onChange({ promoCode: code })}
-              onRemovePromo={() => onChange({ promoCode: undefined })}
-            />
+            {/* Mobile Price Summary */}
+            <div className="block md:hidden">
+              <motion.details
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg rounded-xl shadow-xl"
+              >
+                <summary className="text-lg font-semibold p-4 cursor-pointer text-gray-900 dark:text-white">
+                  View Price Breakdown
+                </summary>
+                <div className="px-4 pb-4">
+                  <PriceSummary
+                    basePrice={basePrice * surfaceArea}
+                    quantity={formData.quantity || 1}
+                    items={[
+                      {
+                        label: 'Material',
+                        amount: basePrice * surfaceArea,
+                        details: selectedMaterial?.name
+                      },
+                      {
+                        label: 'Dimensions',
+                        amount: 0,
+                        details: `${length} × ${width} × ${height} mm`
+                      }
+                    ]}
+                    priceBreakdown={priceBreakdown}
+                    promoCode={formData.promoCode}
+                    onApplyPromo={(code) => onChange({ promoCode: code })}
+                    onRemovePromo={() => onChange({ promoCode: undefined })}
+                  />
+                </div>
+              </motion.details>
+            </div>
+
+            {/* Desktop Price Summary */}
+            <div className="hidden md:block">
+              <PriceSummary
+                basePrice={basePrice * surfaceArea}
+                quantity={formData.quantity || 1}
+                items={[
+                  {
+                    label: 'Material',
+                    amount: basePrice * surfaceArea,
+                    details: selectedMaterial?.name
+                  },
+                  {
+                    label: 'Dimensions',
+                    amount: 0,
+                    details: `${length} × ${width} × ${height} mm`
+                  }
+                ]}
+                priceBreakdown={priceBreakdown}
+                promoCode={formData.promoCode}
+                onApplyPromo={(code) => onChange({ promoCode: code })}
+                onRemovePromo={() => onChange({ promoCode: undefined })}
+              />
+            </div>
           </div>
 
           {/* Next Step Button */}
           <div className="flex justify-end pt-4">
-            <button
+            <motion.button
               onClick={onNext}
               disabled={!isValid}
-              className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              whileTap={{ scale: 0.97 }}
+              className="w-full sm:w-auto px-6 py-3 sm:py-2 min-h-[50px] bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
               Next Step
-            </button>
+              <ArrowRight className="ml-2 w-4 h-4" />
+            </motion.button>
           </div>
         </div>
       </motion.div>

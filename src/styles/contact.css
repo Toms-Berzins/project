@@ -2,22 +2,14 @@
 .glass-card {
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.05) 0%,
-    rgba(255, 255, 255, 0.02) 100%
-  );
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-card:hover {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.07) 0%,
-    rgba(255, 255, 255, 0.03) 100%
-  );
+  background: rgba(255, 255, 255, 0.07);
   border-color: rgba(255, 255, 255, 0.15);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
 }
@@ -32,6 +24,7 @@
   font-size: 1rem;
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
+  min-height: 50px;
 }
 
 .glass-input:hover:not(:focus) {
@@ -65,6 +58,7 @@
 
 .expanding-input.focused .form-label {
   color: rgb(249, 115, 22);
+  transform: translateY(-2px);
 }
 
 /* Error Message */
@@ -107,16 +101,17 @@
 
 /* Live Chat Button */
 .live-chat-button {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  z-index: 50;
-  padding: 1rem;
-  border-radius: 9999px;
   background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
   box-shadow: 0 4px 20px rgba(249, 115, 22, 0.3);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateZ(0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  border-radius: 9999px;
+  min-width: 50px;
+  min-height: 50px;
 }
 
 .live-chat-button:hover {
@@ -127,12 +122,15 @@
 /* Contact Info Hover Effect */
 .contact-info-item {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .contact-info-item:hover {
   transform: translateX(0.5rem);
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 /* Send Message Button Animation */
@@ -149,17 +147,21 @@
 /* Responsive Adjustments */
 @media (max-width: 640px) {
   .glass-card {
-    margin: 0 -1rem;
-    border-radius: 0;
+    border-radius: 0.75rem;
   }
   
   .contact-grid {
-    gap: 2rem;
+    gap: 1rem;
   }
   
-  .get-directions-button {
-    width: 100%;
-    justify-content: center;
+  .glass-input,
+  .glass-input:focus {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+  
+  .live-chat-button {
+    bottom: 1rem;
+    right: 1rem;
   }
 }
 
@@ -199,7 +201,7 @@
 /* Map Dark Mode */
 .map-dark {
   filter: grayscale(0.8) invert(0.9) contrast(1.2) hue-rotate(180deg);
-  opacity: 0.8;
+  opacity: 0.9;
   transition: all 0.3s ease-in-out;
 }
 
@@ -263,31 +265,6 @@
   animation: shimmer 2s infinite;
 }
 
-/* Glass Card Effect - Dark Theme (default) */
-.glass-card {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.05) 0%,
-    rgba(255, 255, 255, 0.02) 100%
-  );
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-/* Glass Input Effect - Dark Theme (default) */
-.glass-input {
-  background: rgba(255, 255, 255, 0.03);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.glass-input:focus {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(249, 115, 22, 0.4);
-}
-
-.contact-info-item:hover {
-  background: rgba(255, 255, 255, 0.03);
-}
-
 /* Improved focus styles */
 .focus-ring {
   outline: none;
@@ -312,7 +289,7 @@
   80% { transform: translateX(3px); }
 }
 
-/* Improved button states */
+/* Interactive button states */
 .interactive-button {
   position: relative;
   overflow: hidden;
@@ -400,11 +377,7 @@
 
 /* Dark mode adjustments */
 [data-theme="dark"] .glass-card {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.05) 0%,
-    rgba(255, 255, 255, 0.02) 100%
-  );
+  background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.08);
 }
 
@@ -432,71 +405,17 @@
   background: rgba(0, 0, 0, 0.03);
 }
 
-/* Success Animation */
-@keyframes successCheck {
-  0% {
-    transform: scale(0);
-    opacity: 0;
-  }
-  50% {
-    transform: scale(1.2);
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+/* Map Styles */
+.map-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  transform: translateZ(0);
 }
 
-@keyframes successBounce {
-  0% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-  100% {
-    transform: translateY(0);
-  }
-}
-
-.success-checkmark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 3rem;
-  height: 3rem;
-  background: rgba(34, 197, 94, 0.2);
-  border-radius: 50%;
-  animation: successBounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-.success-checkmark svg {
-  animation: successCheck 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-/* Confetti Animation */
-.confetti {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background: #f97316;
-  opacity: 0;
-}
-
-.confetti-animation {
-  animation: confetti 1s ease-out forwards;
-  transform-origin: center;
-}
-
-@keyframes confetti {
-  0% {
-    transform: translateY(0) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(100px) rotate(720deg);
-    opacity: 0;
-  }
+.map-marker {
+  transition: transform 0.3s ease;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
 }
 
 /* Map Marker Animation */
@@ -515,19 +434,264 @@
   animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
-/* Map Container */
-.map-container {
+/* Theme transition */
+.theme-transition {
+  transition: background-color 0.3s ease,
+              color 0.3s ease,
+              border-color 0.3s ease,
+              box-shadow 0.3s ease;
+}
+
+/* Enhanced Button Hover Glow */
+.hover:glow-button {
   position: relative;
+}
+
+.hover:glow-button::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(to right, #f97316, #ea580c);
+  border-radius: inherit;
+  padding: 1px;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.hover:glow-button:hover::before {
+  opacity: 1;
+}
+
+.hover:glow-button:hover {
+  box-shadow: 0 0 25px rgba(249, 115, 22, 0.5);
+}
+
+/* Form Field Hover Effects */
+.glass-input:hover {
+  background: rgba(255, 255, 255, 0.04);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Enhanced Form Animations */
+@keyframes formFieldEntry {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-field-entry {
+  animation: formFieldEntry 0.4s ease-out forwards;
+}
+
+/* Enhanced Send Button Animation */
+.send-button {
+  animation: pulse 2s infinite;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.send-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(249, 115, 22, 0.4),
+              0 0 0 2px rgba(249, 115, 22, 0.2);
+}
+
+.send-button:active {
+  transform: translateY(1px);
+}
+
+/* Enhanced Pulse Animation */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(249, 115, 22, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0);
+  }
+}
+
+/* Smooth Field Focus Transition */
+.expanding-input {
+  transform-origin: top;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.expanding-input.focused {
+  transform: scale(1.02);
+}
+
+.expanding-input input:focus,
+.expanding-input textarea:focus,
+.expanding-input select:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(249, 115, 22, 0.15),
+              0 0 0 2px rgba(249, 115, 22, 0.2);
+}
+
+/* Modern Dropdown Styles */
+.headlessui-listbox-button {
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  width: 100%;
+  min-width: 0;
+}
+
+.headlessui-listbox-button > span {
+  flex: 1;
+  min-width: 0;
+  margin-right: 8px;
+}
+
+.headlessui-listbox-button:hover {
+  background: rgba(255, 255, 255, 0.04);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.headlessui-listbox-button[aria-expanded="true"] {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(249, 115, 22, 0.15);
+}
+
+/* Dropdown Options Container */
+.headlessui-listbox-options {
+  transform-origin: top;
+  backface-visibility: hidden;
+  animation: slideDownAndFade 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(249, 115, 22, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+  min-width: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(249, 115, 22, 0.3) rgba(255, 255, 255, 0.1);
+}
+
+.headlessui-listbox-options::-webkit-scrollbar {
+  width: 6px;
+}
+
+.headlessui-listbox-options::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.headlessui-listbox-options::-webkit-scrollbar-thumb {
+  background-color: rgba(249, 115, 22, 0.3);
+  border-radius: 3px;
+  border: 2px solid transparent;
+}
+
+.headlessui-listbox-options::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(249, 115, 22, 0.5);
+}
+
+/* Option Item */
+.headlessui-listbox-option {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  padding: 0.625rem 1rem;
+  margin: 0.125rem 0;
+}
+
+.headlessui-listbox-option > div {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.headlessui-listbox-option span {
+  white-space: nowrap;
   overflow: hidden;
-  border-radius: 0.5rem;
-  transform: translateZ(0);
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
 }
 
-.map-container:hover .map-marker {
-  transform: scale(1.1);
+/* Enhanced Dropdown Animation */
+@keyframes slideDownAndFade {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-.map-marker {
-  transition: transform 0.3s ease;
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+/* Option Hover Effect */
+.headlessui-listbox-option::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 0;
+  background: linear-gradient(to bottom, #f97316, #ea580c);
+  opacity: 0;
+  transition: all 0.2s ease-out;
+}
+
+.headlessui-listbox-option:hover::before {
+  opacity: 0.5;
+  height: 70%;
+}
+
+/* Selected Option Style */
+.headlessui-listbox-option[aria-selected="true"] {
+  background: rgba(249, 115, 22, 0.1);
+}
+
+.headlessui-listbox-option[aria-selected="true"]:hover {
+  background: rgba(249, 115, 22, 0.15);
+}
+
+/* Enhanced Focus States */
+.headlessui-listbox-button:focus-visible {
+  outline: none;
+  box-shadow: 
+    0 0 0 2px rgba(249, 115, 22, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.headlessui-listbox-option:focus-visible {
+  outline: none;
+  background: rgba(249, 115, 22, 0.15);
+}
+
+/* Mobile Optimizations */
+@media (max-width: 640px) {
+  .headlessui-listbox-options {
+    max-height: 40vh;
+    box-shadow: 
+      0 8px 25px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(249, 115, 22, 0.15);
+  }
+  
+  .headlessui-listbox-option {
+    padding: 0.75rem 1rem;
+  }
 } 

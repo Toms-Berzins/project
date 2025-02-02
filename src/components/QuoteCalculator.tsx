@@ -166,6 +166,57 @@ export default function QuoteCalculator() {
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage(undefined);
+
+    try {
+      if (!userId) {
+        // Show login modal with guest option
+        setShowLoginModal(true);
+        return;
+      }
+
+      await submitQuote(true);
+    } catch (error) {
+      setErrorMessage(createErrorMessage(error));
+    }
+  };
+
+  const submitQuote = async (isRegistered: boolean) => {
+    let quoteRef;
+    
+    if (isRegistered && userId) {
+      // Save quote for registered user
+      const savedQuote = await saveQuote(userId, formData, priceBreakdown!);
+      quoteRef = savedQuote.quoteReference;
+    } else {
+      // Generate a temporary reference for guest users
+      quoteRef = `GUEST-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    }
+
+    // Send email regardless of user type
+    await sendQuoteEmail({
+      formData,
+      priceBreakdown: priceBreakdown!,
+      quoteReference: quoteRef,
+      isGuest: !isRegistered
+    });
+
+    setQuoteReference(quoteRef);
+    setShowSuccess(true);
+  };
+
+  const handleLoginModalClose = () => {
+    setShowLoginModal(false);
+    // Show guest quote confirmation dialog
+    if (confirm('Would you like to continue as a guest? You can still receive your quote via email.')) {
+      submitQuote(false).catch(error => {
+        setErrorMessage(createErrorMessage(error));
+      });
+    }
+  };
+
   const handleLogin = async (email: string, password: string) => {
     try {
       const response = await fetch(`${API_URL}/api/auth/login`, {
@@ -185,6 +236,10 @@ export default function QuoteCalculator() {
       setUserId(data.user._id);
       setShowLoginModal(false);
       setErrorMessage(undefined);
+      
+      // Submit quote after successful login
+      await submitQuote(true);
+      
       return data;
     } catch (error) {
       setErrorMessage(createErrorMessage(error));
@@ -218,61 +273,44 @@ export default function QuoteCalculator() {
     }
   };
 
-  const handleSocialLogin = async (provider: 'google' | 'facebook') => {
-    try {
-      // Open the OAuth provider's login page in a new window
-      const width = 500;
-      const height = 600;
-      const left = window.screenX + (window.outerWidth - width) / 2;
-      const top = window.screenY + (window.outerHeight - height) / 2;
+  const handleSocialLogin = (provider: 'google' | 'facebook') => {
+    // Open the OAuth provider's login page in a new window
+    const width = 500;
+    const height = 600;
+    const left = window.screenX + (window.outerWidth - width) / 2;
+    const top = window.screenY + (window.outerHeight - height) / 2;
+    
+    const popup = window.open(
+      `${API_URL}/api/auth/${provider}`,
+      `${provider}Login`,
+      `width=${width},height=${height},left=${left},top=${top}`
+    );
+
+    if (!popup) {
+      setErrorMessage('Failed to open login window. Please ensure pop-ups are allowed.');
+      return;
+    }
+
+    // Listen for the OAuth callback message
+    const handleMessage = async (event: MessageEvent) => {
+      if (event.origin !== API_URL) return;
       
-      window.open(
-        `${API_URL}/api/auth/${provider}`,
-        `${provider}Login`,
-        `width=${width},height=${height},left=${left},top=${top}`
-      );
-
-      // Listen for the OAuth callback message
-      const handleMessage = async (event: MessageEvent) => {
-        if (event.origin !== API_URL) return;
+      if (event.data.type === 'social-login-success') {
+        window.removeEventListener('message', handleMessage);
+        setUserId(event.data.user._id);
+        setShowLoginModal(false);
+        setErrorMessage(undefined);
         
-        if (event.data.type === 'social-login-success') {
-          window.removeEventListener('message', handleMessage);
-          setUserId(event.data.user._id);
-          setShowLoginModal(false);
-          setErrorMessage(undefined);
+        // Submit quote after successful social login
+        try {
+          await submitQuote(true);
+        } catch (error) {
+          setErrorMessage(createErrorMessage(error));
         }
-      };
-
-      window.addEventListener('message', handleMessage);
-    } catch (error) {
-      setErrorMessage(createErrorMessage(error));
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage(undefined);
-
-    try {
-      if (!userId) {
-        setShowLoginModal(true);
-        return;
       }
+    };
 
-      const savedQuote = await saveQuote(userId, formData, priceBreakdown!);
-      setQuoteReference(savedQuote.quoteReference);
-
-      await sendQuoteEmail({
-        formData,
-        priceBreakdown: priceBreakdown!,
-        quoteReference: savedQuote.quoteReference
-      });
-
-      setShowSuccess(true);
-    } catch (error) {
-      setErrorMessage(createErrorMessage(error));
-    }
+    window.addEventListener('message', handleMessage);
   };
 
   const renderStep = () => {
@@ -349,7 +387,7 @@ export default function QuoteCalculator() {
           onLogin={handleLogin}
           onSignup={handleSignup}
           onSocialLogin={handleSocialLogin}
-          onClose={() => setShowLoginModal(false)}
+          onClose={handleLoginModalClose}
           error={errorMessage}
           prefillName={formData.contact.name}
           prefillEmail={formData.contact.email}
@@ -362,6 +400,7 @@ export default function QuoteCalculator() {
           formData={formData}
           priceBreakdown={priceBreakdown!}
           onStartNewQuote={handleStartNewQuote}
+          isGuest={!userId}
         />
       ) : (
         <>

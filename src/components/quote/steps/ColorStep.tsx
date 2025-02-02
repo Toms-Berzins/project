@@ -44,7 +44,7 @@ export const ColorStep = ({
   const total = subtotal + addonsTotal;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div className="grid grid-cols-1 gap-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -55,7 +55,7 @@ export const ColorStep = ({
           <select
             value={formData.color.type}
             onChange={(e) => updateFormData('color.type', e.target.value)}
-            className={`${selectClasses} ${errors.colorType ? errorInputClasses : ''}`}
+            className={`${selectClasses} ${errors.colorType ? errorInputClasses : ''} py-3 sm:py-2`}
             aria-label="Color Type"
             title="Select color type"
           >
@@ -80,7 +80,7 @@ export const ColorStep = ({
               type="text"
               value={formData.color.custom || ''}
               onChange={(e) => updateFormData('color.custom', e.target.value)}
-              className={`${commonInputClasses} ${errors.customColor ? errorInputClasses : ''}`}
+              className={`${commonInputClasses} ${errors.customColor ? errorInputClasses : ''} py-3 sm:py-2`}
               placeholder="Describe your custom color"
             />
             <label className={floatingLabelClasses}>
@@ -98,7 +98,7 @@ export const ColorStep = ({
             value={formData.quantity}
             onChange={(e) => updateFormData('quantity', e.target.value)}
             min="1"
-            className={`${commonInputClasses} ${errors.quantity ? errorInputClasses : ''}`}
+            className={`${commonInputClasses} ${errors.quantity ? errorInputClasses : ''} py-3 sm:py-2`}
             placeholder="Enter quantity"
           />
           <label className={floatingLabelClasses}>
@@ -113,7 +113,7 @@ export const ColorStep = ({
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
             Additional Options
           </h3>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {addons.map((addon) => (
               <label
                 key={addon.id}
@@ -128,7 +128,7 @@ export const ColorStep = ({
                       : formData.addons.filter((id) => id !== addon.id);
                     updateFormData('addons', newAddons);
                   }}
-                  className="w-5 h-5 rounded border-gray-300 text-accent focus:ring-accent"
+                  className="w-6 h-6 rounded border-gray-300 text-accent focus:ring-accent"
                 />
                 <div className="ml-3 flex-grow">
                   <span className="text-gray-900 dark:text-white font-medium group-hover:text-accent transition-colors">
@@ -144,17 +144,79 @@ export const ColorStep = ({
         </div>
 
         <div className="flex justify-end">
-          <button
+          <motion.button
             type="button"
             onClick={onNext}
-            className="flex items-center bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg transition-colors"
+            whileTap={{ scale: 0.97 }}
+            className="flex items-center bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 sm:py-2 min-h-[50px] rounded-lg transition-colors w-full sm:w-auto justify-center sm:justify-start"
           >
             Next
             <ArrowRight className="ml-2 w-4 h-4" />
-          </button>
+          </motion.button>
         </div>
       </motion.div>
 
+      {/* Mobile Price Summary */}
+      <div className="block md:hidden">
+        <motion.details
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg rounded-xl shadow-xl"
+        >
+          <summary className="text-lg font-semibold p-4 cursor-pointer text-gray-900 dark:text-white">
+            View Price Breakdown
+          </summary>
+          <div className="px-4 pb-4">
+            <PriceSummary
+              basePrice={basePrice}
+              items={[
+                {
+                  label: 'Material',
+                  amount: basePrice * formData.quantity,
+                  details: selectedMaterial?.name
+                },
+                ...(selectedCoating ? [{
+                  label: 'Coating',
+                  amount: coatingPrice * formData.quantity,
+                  details: selectedCoating.name
+                }] : []),
+                ...(selectedFinish ? [{
+                  label: 'Finish',
+                  amount: finishPrice * formData.quantity,
+                  details: selectedFinish.name
+                }] : []),
+                ...(selectedColor && colorMultiplier > 1 ? [{
+                  label: 'Color Premium',
+                  amount: ((basePrice + coatingPrice + finishPrice) * (colorMultiplier - 1)) * formData.quantity,
+                  details: selectedColor.name
+                }] : []),
+                ...(addonsTotal > 0 ? [{
+                  label: 'Add-ons',
+                  amount: addonsTotal,
+                  details: formData.addons
+                    .map(id => addons.find(a => a.id === id)?.name)
+                    .filter(Boolean)
+                    .join(', ')
+                }] : [])
+              ]}
+              priceBreakdown={{
+                subtotal: total,
+                bulkDiscount: 0,
+                bundleDiscount: 0,
+                seasonalDiscount: 0,
+                total: total,
+                appliedDiscounts: []
+              }}
+              quantity={formData.quantity}
+              onApplyPromo={() => {}}
+              onRemovePromo={() => {}}
+            />
+          </div>
+        </motion.details>
+      </div>
+
+      {/* Desktop Price Summary */}
       <div className="hidden md:block">
         <PriceSummary
           basePrice={basePrice}

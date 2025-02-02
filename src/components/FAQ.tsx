@@ -1,12 +1,54 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect, useMemo } from 'react';
-import { Search, Lightbulb } from 'lucide-react';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { Search, ArrowUp } from 'lucide-react';
 import Accordion from './ui/Accordion';
 import { faqs, categoryColors } from './FAQ/faq.data';
 import { CategoryIcon } from './FAQ/CategoryIcon';
 import Input from './ui/Input';
 import { HighlightedFAQ } from './FAQ/types';
 import { PLACEHOLDER_QUERIES } from './FAQ/constants';
+import { containerVariants, itemVariants } from './FAQ/animations';
+import { highlightText } from './FAQ/utils';
+import { useReducedMotion } from 'framer-motion';
+
+// Add FloatingBackground component
+const FloatingBackground = () => {
+  const prefersReducedMotion = useReducedMotion();
+  const elements = Array.from({ length: 3 }, (_, i) => i);
+
+  if (prefersReducedMotion) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
+    >
+      {elements.map((i) => (
+        <motion.div
+          key={i}
+          className="absolute w-[300px] h-[300px] rounded-full pointer-events-none"
+          style={{
+            background: 'radial-gradient(circle, rgba(251,146,60,0.03) 0%, transparent 70%)',
+            top: `${20 + i * 30}%`,
+            left: `${20 + i * 25}%`,
+          }}
+          animate={{
+            y: [0, -20, 0],
+            opacity: [0.5, 0.8, 0.5],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{
+            duration: 6 + i * 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: i * 2,
+          }}
+        />
+      ))}
+    </motion.div>
+  );
+};
 
 const FAQ = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -16,29 +58,21 @@ const FAQ = () => {
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [typedPlaceholder, setTypedPlaceholder] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [openIndexes, setOpenIndexes] = useState<number[]>([]);
+  const [openQuestion, setOpenQuestion] = useState<{ category: string; index: number } | null>(null);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  
+  // Add refs for each category section
+  const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: "easeOut"
-      }
-    }
-  };
+  // Add scroll listener for back to top button
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 500);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Group FAQs by category
   const faqsByCategory = useMemo(() => {
@@ -50,16 +84,6 @@ const FAQ = () => {
       return acc;
     }, {} as Record<string, typeof faqs>);
   }, []);
-
-  // Highlight matching text
-  const highlightText = (text: string, query: string) => {
-    const parts = text.split(new RegExp(`(${query})`, 'gi'));
-    return parts.map(part => 
-      part.toLowerCase() === query.toLowerCase() 
-        ? `<mark class="bg-orange-200/20 text-orange-400 px-1 rounded">${part}</mark>`
-        : part
-    ).join('');
-  };
 
   // Filter and highlight FAQs
   const { filteredFaqsByCategory } = useMemo(() => {
@@ -131,6 +155,30 @@ const FAQ = () => {
     }
   }, [hoveredQuestion]);
 
+  const handleRelatedQuestionClick = (question: string) => {
+    // Find the category and index of the related question
+    let targetCategory = '';
+    let questionIndex = -1;
+
+    for (const category in faqsByCategory) {
+      const index = faqsByCategory[category].findIndex(faq => faq.question === question);
+      if (index !== -1) {
+        targetCategory = category;
+        questionIndex = index;
+        break;
+      }
+    }
+
+    if (targetCategory && questionIndex !== -1) {
+      setSelectedCategory(targetCategory);
+      // Wait for the category to be selected and scrolled before opening the question
+      setTimeout(() => {
+        setOpenQuestion({ category: targetCategory, index: questionIndex });
+        scrollToCategory(targetCategory);
+      }, 100);
+    }
+  };
+
   // Animated placeholder effect
   useEffect(() => {
     let currentIndex = 0;
@@ -157,26 +205,42 @@ const FAQ = () => {
     return () => clearTimeout(timeout);
   }, [placeholderIndex, isSearchFocused]);
 
+  const scrollToCategory = (category: string) => {
+    const element = categoryRefs.current[category];
+    if (element) {
+      const offset = 100; // Offset to account for fixed header if any
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
-    <section className="relative py-24 bg-gradient-to-b from-gray-900 to-gray-800 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-radial from-orange-500/5 via-transparent to-transparent" />
+    <section className="relative py-8 sm:py-16 lg:py-24 bg-gradient-to-b from-gray-900 to-gray-800 overflow-hidden">
+      <div className="absolute inset-0 bg-grid-pattern opacity-5" />
+      <div className="absolute inset-0 bg-gradient-to-b from-gray-900/80 via-transparent to-gray-800/80 pointer-events-none" />
+      <FloatingBackground />
+      <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-orange-500/20 to-transparent" />
+      <div className="absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-transparent via-orange-500/20 to-transparent" />
       
       <motion.div 
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10"
       >
         <motion.div 
           variants={itemVariants} 
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent 
-            bg-gradient-to-r from-orange-400 to-orange-600 mb-6
-            [text-shadow:_0_2px_10px_rgba(251,146,60,0.3)]">
+          <h2 className="title-primary mb-4">
             Frequently Asked Questions
           </h2>
-          <p className="text-xl text-gray-300 [text-shadow:_0_1px_5px_rgba(255,255,255,0.1)]">
+          <p className="subtitle-primary max-w-2xl mx-auto">
             Find answers to common questions about our powder coating services.
           </p>
         </motion.div>
@@ -185,8 +249,9 @@ const FAQ = () => {
           variants={itemVariants}
           className="mb-8"
         >
-          <div className="relative group">
+          <div className="relative group glass-panel">
             <Input
+              ref={searchInputRef}
               type="text"
               placeholder={isSearchFocused ? "Type to search..." : typedPlaceholder}
               value={searchQuery}
@@ -195,7 +260,7 @@ const FAQ = () => {
               onBlur={() => setIsSearchFocused(false)}
               fullWidth
               variant="filled"
-              className="pl-12 py-3 text-lg"
+              className="pl-12 py-3 text-lg min-h-[50px]"
             />
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <motion.div
@@ -216,7 +281,7 @@ const FAQ = () => {
           variants={itemVariants}
           layout
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
             {categoriesWithContent.map(category => (
               <motion.div 
                 key={category}
@@ -246,7 +311,9 @@ const FAQ = () => {
                     selectedCategory === category ? null : category
                   );
                   // Reset open indexes when changing category
-                  setOpenIndexes([]);
+                  setOpenQuestion(null);
+                  // Scroll to the category section
+                  scrollToCategory(category);
                 }}
                 className={`p-4 rounded-xl bg-gradient-to-br ${categoryColors[category as keyof typeof categoryColors]} 
                   backdrop-blur-lg transition-all duration-300 cursor-pointer
@@ -295,8 +362,9 @@ const FAQ = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
+                ref={el => categoryRefs.current[category] = el}
               >
-                <h3 className="text-2xl font-semibold text-white mb-6 flex items-center gap-3">
+                <h3 className="text-2xl font-semibold mb-6 flex items-center gap-3 text-white">
                   <div className={`p-2 rounded-lg ${categoryColors[category as keyof typeof categoryColors]}`}>
                     <CategoryIcon category={category as keyof typeof categoryColors} />
                   </div>
@@ -304,7 +372,7 @@ const FAQ = () => {
                 </h3>
                 
                 <Accordion 
-                  items={categoryFaqs.map((faq, idx) => ({
+                  items={categoryFaqs.map((faq) => ({
                     title: searchQuery ? (
                       (faq as HighlightedFAQ).highlightedQuestion || faq.question
                     ) : faq.question,
@@ -313,53 +381,105 @@ const FAQ = () => {
                         className="prose prose-invert max-w-none relative"
                         onMouseEnter={() => setHoveredQuestion(faq.question)}
                         onMouseLeave={() => setHoveredQuestion(null)}
-                        initial={{ opacity: 0, y: 10 }}
+                        initial={{ height: 0, opacity: 0 }}
                         animate={{ 
-                          opacity: 1, 
-                          y: 0,
-                          transition: { delay: idx * 0.1 }
+                          height: "auto", 
+                          opacity: 1,
+                          transition: {
+                            height: { duration: 0.3, ease: "easeInOut" },
+                            opacity: { duration: 0.2, delay: 0.1 }
+                          }
                         }}
+                        exit={{ height: 0, opacity: 0 }}
                       >
-                        <div 
-                          className="text-gray-300"
-                          dangerouslySetInnerHTML={{ 
-                            __html: (faq as HighlightedFAQ).highlightedAnswer || faq.answer 
-                          }}
-                        />
-                        
-                        {/* AI Suggestion Tooltip */}
-                        <AnimatePresence>
-                          {hoveredQuestion === faq.question && suggestedQuestion && (
-                            <motion.div
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: 10 }}
-                              className="mt-4 p-3 rounded-lg bg-orange-500/10 border border-orange-500/20
-                                flex items-start gap-2"
-                            >
-                              <Lightbulb className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
-                              <div>
-                                <p className="text-sm font-medium text-orange-400 mb-1">
-                                  Related Question
-                                </p>
-                                <p className="text-sm text-gray-300">
-                                  {suggestedQuestion}
-                                </p>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
+                        <div className="py-4 px-4 rounded-lg hover:bg-gray-800/50 transition-all">
+                          <motion.div 
+                            className="text-gray-300"
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ 
+                              y: 0, 
+                              opacity: 1,
+                              transition: { delay: 0.1 }
+                            }}
+                            dangerouslySetInnerHTML={{ 
+                              __html: (faq as HighlightedFAQ).highlightedAnswer || faq.answer 
+                            }}
+                          />
+                          
+                          {/* Related Question Tooltip */}
+                          <AnimatePresence>
+                            {hoveredQuestion === faq.question && suggestedQuestion && (
+                              <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 10 }}
+                                className="mt-2 p-3 rounded-lg bg-orange-500/10 text-sm border border-orange-500/20 cursor-pointer hover:bg-orange-500/20 transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRelatedQuestionClick(suggestedQuestion);
+                                }}
+                              >
+                                <div className="flex items-start gap-2">
+                                  <span className="font-medium text-orange-400">Related Question</span>
+                                  <p className="text-gray-300">{suggestedQuestion}</p>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
                       </motion.div>
                     )
                   }))}
                   className="space-y-4"
-                  openIndexes={openIndexes}
-                  onToggle={setOpenIndexes}
-                  allowMultiple
+                  openIndexes={openQuestion?.category === category ? [openQuestion.index] : []}
+                  onToggle={(indexes) => {
+                    const clickedIndex = indexes[0];
+                    setOpenQuestion(
+                      openQuestion?.category === category && openQuestion.index === clickedIndex
+                        ? null
+                        : { category, index: clickedIndex }
+                    );
+                  }}
+                  allowMultiple={false}
                 />
               </motion.div>
             );
           })}
+        </AnimatePresence>
+
+        {/* Back to Top Button */}
+        <AnimatePresence>
+          {showBackToTop && (
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ 
+                opacity: 1, 
+                y: 0,
+                boxShadow: [
+                  "0px 0px 0px rgba(234, 88, 12, 0)",
+                  "0px 0px 15px rgba(234, 88, 12, 0.5)",
+                  "0px 0px 0px rgba(234, 88, 12, 0)"
+                ]
+              }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{
+                boxShadow: {
+                  repeat: Infinity,
+                  duration: 2,
+                  ease: "easeInOut"
+                }
+              }}
+              whileHover={{ 
+                scale: 1.1,
+                boxShadow: "0px 0px 20px rgba(234, 88, 12, 0.7)"
+              }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="fixed bottom-6 right-6 button-primary p-4 rounded-full transform-gpu z-[100]"
+            >
+              <ArrowUp className="w-6 h-6" />
+            </motion.button>
+          )}
         </AnimatePresence>
       </motion.div>
     </section>

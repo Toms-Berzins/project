@@ -77,7 +77,7 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex items-center py-20 overflow-hidden">
+    <section className="hero-section relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Particles Background */}
       <div className="absolute inset-0">
         <Particles />
@@ -85,88 +85,78 @@ export default function Hero() {
       </div>
 
       {/* Hero Section */}
-      <div className="section-pattern">
-        {/* Hero Content */}
+      <motion.div 
+        className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32"
+        style={{ y: parallaxY }}
+      >
         <motion.div 
-          className="hero-gradient min-h-[70vh] flex items-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          style={{ y: parallaxY }}
+          className="relative"
+          variants={staggerChildren}
+          initial="hidden"
+          animate="animate"
         >
-          <div className="hero-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 w-full">
-            <motion.div 
-              ref={cardRef}
-              className="max-w-xl glass-enhanced p-8 rounded-2xl card-3d relative backdrop-blur-xl
-                bg-white/5 dark:bg-gray-900/30 border border-white/10 dark:border-white/5
-                shadow-2xl shadow-black/5 dark:shadow-orange-500/5"
-              style={{
-                rotateX: rotateXSpring,
-                rotateY: rotateYSpring
-              }}
-              variants={staggerChildren}
-              initial="initial"
-              animate="animate"
-            >
-              {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-blue-500/10 rounded-2xl opacity-50" />
-              
-              <motion.div className="card-3d-content relative z-10">
-                <motion.h1 
-                  className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6
-                    bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-orange-600
-                    [text-shadow:_0_2px_10px_rgba(251,146,60,0.3)]"
-                  variants={fadeInUp}
+          <motion.div 
+            ref={cardRef}
+            className="hero-card relative rounded-2xl p-8 sm:p-12 lg:p-16 overflow-hidden
+              backdrop-blur-xl bg-white/5 dark:bg-gray-900/30
+              border border-white/10 dark:border-white/5
+              shadow-2xl shadow-black/5
+              transform-gpu perspective-1000"
+            variants={fadeInUp}
+            style={{
+              rotateX: rotateXSpring,
+              rotateY: rotateYSpring
+            }}
+          >
+            {/* Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-blue-500/10 rounded-2xl opacity-50" />
+            
+            <motion.div className="card-3d-content relative z-10">
+              <motion.h1 
+                className="title-primary mb-6"
+                variants={fadeInUp}
+              >
+                Premium Powder Coating Solutions
+              </motion.h1>
+              <motion.p 
+                className="subtitle-primary mb-8"
+                variants={fadeInUp}
+              >
+                Transform your metal surfaces with our professional powder coating services. 
+                Durable, beautiful, and environmentally friendly.
+              </motion.p>
+
+              <motion.div 
+                className="flex flex-col sm:flex-row gap-4"
+                variants={fadeInUp}
+              >
+                <Link 
+                  to="/quote"
+                  className="inline-block group"
                 >
-                  Premium Powder Coating Solutions
-                </motion.h1>
-                <motion.p 
-                  className="text-xl text-gray-300 mb-8
-                    [text-shadow:_0_1px_5px_rgba(255,255,255,0.1)]"
-                  variants={fadeInUp}
-                >
-                  Transform your metal surfaces with our professional powder coating services. 
-                  Durable, beautiful, and environmentally friendly.
-                </motion.p>
-                
-                <motion.div 
-                  className="flex flex-col sm:flex-row gap-4"
-                  variants={fadeInUp}
-                >
-                  <Link 
-                    to="/quote"
-                    className="inline-block group"
-                  >
-                    <InteractiveButton
-                      variant="primary"
-                      size="lg"
-                      icon={<ArrowRight className="w-5 h-5" />}
-                      iconPosition="right"
-                      className="w-full group tooltip glass-effect
-                        bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700
-                        shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30
-                        border border-orange-400/20 hover:border-orange-400/30"
-                    >
-                      Get Started
-                    </InteractiveButton>
-                  </Link>
                   <InteractiveButton
-                    variant="outline"
+                    variant="primary"
                     size="lg"
-                    onClick={handlePortfolioClick}
-                    className="glass-effect press-effect group tooltip
-                      bg-white/5 hover:bg-white/10 dark:bg-gray-900/30 dark:hover:bg-gray-900/50
-                      backdrop-blur-xl border border-white/10 dark:border-white/5
-                      shadow-lg shadow-black/5 hover:shadow-black/10"
+                    icon={<ArrowRight className="w-5 h-5" />}
+                    iconPosition="right"
+                    className="w-full group tooltip glass-effect button-primary"
                   >
-                    View Portfolio
+                    Get Started
                   </InteractiveButton>
-                </motion.div>
+                </Link>
+                <InteractiveButton
+                  variant="outline"
+                  size="lg"
+                  onClick={handlePortfolioClick}
+                  className="glass-effect press-effect group tooltip button-secondary"
+                >
+                  View Portfolio
+                </InteractiveButton>
               </motion.div>
             </motion.div>
-          </div>
+          </motion.div>
         </motion.div>
-      </div>
+      </motion.div>
     </section>
   );
 }

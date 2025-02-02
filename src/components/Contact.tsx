@@ -1,103 +1,22 @@
 import { Phone, Mail, MapPin, Clock, ArrowRight, MessageCircle, AlertCircle, X } from 'lucide-react';
-import { useState, useRef, useEffect, useCallback, memo } from 'react';
+import { useState, useRef, useEffect, useCallback, memo, Fragment } from 'react';
 import { toast } from 'react-hot-toast';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { Listbox, Transition } from '@headlessui/react';
+import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/24/solid';
 import Card, { CardHeader, CardContent, CardTitle } from './ui/Card';
+import { 
+  containerVariants, 
+  itemVariants, 
+  contactInfoVariants, 
+  iconContainerVariants, 
+  iconVariants, 
+  buttonVariants, 
+  formFieldVariants 
+} from './Contact/animations';
+import type { FormData, FormErrors } from './Contact/types';
 
-// Animation variants
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      duration: 0.6
-    }
-  }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      ease: [0.25, 0.1, 0.25, 1]
-    }
-  }
-};
-
-const contactInfoVariants = {
-  hover: {
-    x: 8,
-    transition: { type: "spring", stiffness: 300 }
-  }
-};
-
-const iconContainerVariants = {
-  hover: {
-    scale: 1.1,
-    backgroundColor: "rgba(249, 115, 22, 0.2)",
-    transition: { type: "spring", stiffness: 300 }
-  }
-};
-
-const iconVariants = {
-  hover: {
-    rotate: [0, -10, 10, -5, 5, 0],
-    transition: {
-      duration: 0.5,
-      ease: "easeInOut"
-    }
-  },
-  tap: {
-    scale: 0.95
-  }
-};
-
-const buttonVariants = {
-  hover: {
-    y: -2,
-    transition: {
-      duration: 0.2,
-      ease: "easeInOut"
-    }
-  },
-  tap: {
-    y: 0,
-    scale: 0.95,
-    transition: {
-      duration: 0.1,
-      ease: "easeInOut"
-    }
-  }
-};
-
-const formFieldVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.3,
-      ease: "easeOut"
-    }
-  }
-};
-
-interface FormData {
-  name: string;
-  email: string;
-  phone: string;
-  subject: string;
-  message: string;
-}
-
-interface FormErrors {
-  [key: string]: string;
-}
-
+// Components
 const SocialButtons = memo(() => {
   const phoneNumber = '1234567890';
   const messengerUsername = 'yourbusinesspage';
@@ -108,8 +27,7 @@ const SocialButtons = memo(() => {
         href={`https://wa.me/${phoneNumber}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-2 px-4 py-2.5 bg-[#25D366] text-white 
-          font-semibold rounded-lg transition-colors duration-200 shadow-lg shadow-green-500/20"
+        className="button-primary flex items-center gap-2 px-4 py-2.5"
         variants={buttonVariants}
         whileHover="hover"
         whileTap="tap"
@@ -129,8 +47,7 @@ const SocialButtons = memo(() => {
         href={`https://m.me/${messengerUsername}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-2 px-4 py-2.5 bg-[#0084FF] text-white 
-          font-semibold rounded-lg transition-colors duration-200 shadow-lg shadow-blue-500/20"
+        className="button-secondary flex items-center gap-2 px-4 py-2.5"
         variants={buttonVariants}
         whileHover="hover"
         whileTap="tap"
@@ -170,8 +87,7 @@ const DirectionsButtons = memo(() => {
     <div className="flex flex-wrap gap-3 mt-4">
       <motion.button
         onClick={handleGoogleMaps}
-        className="flex items-center gap-2 px-4 py-2.5 bg-[#4285F4] text-white 
-          font-semibold rounded-lg transition-colors duration-200 shadow-lg shadow-blue-500/20"
+        className="button-primary flex items-center gap-2 px-4 py-2.5"
         variants={buttonVariants}
         whileHover="hover"
         whileTap="tap"
@@ -191,8 +107,7 @@ const DirectionsButtons = memo(() => {
       
       <motion.button
         onClick={handleWaze}
-        className="flex items-center gap-2 px-4 py-2.5 bg-[#33CCFF] text-white 
-          font-semibold rounded-lg transition-colors duration-200 shadow-lg shadow-sky-500/20"
+        className="button-secondary flex items-center gap-2 px-4 py-2.5"
         variants={buttonVariants}
         whileHover="hover"
         whileTap="tap"
@@ -238,7 +153,7 @@ const ContactInfo = memo(({ info }: {
           </motion.div>
         </motion.div>
         <div className="flex-1">
-          <h4 className="text-lg font-medium text-white mb-1">{title}</h4>
+          <h4 className="title-secondary mb-1">{title}</h4>
           {href ? (
             <motion.a 
               href={href}
@@ -250,7 +165,7 @@ const ContactInfo = memo(({ info }: {
               {content}
             </motion.a>
           ) : (
-            <p className="text-gray-300 whitespace-pre-line">{content}</p>
+            <p className="subtitle-card whitespace-pre-line">{content}</p>
           )}
           {title === 'Location' && <DirectionsButtons />}
           {title === 'Phone' && <SocialButtons />}
@@ -290,6 +205,146 @@ const ContactSchema = () => {
         })
       }}
     />
+  );
+};
+
+const ModernDropdown = ({ 
+  value, 
+  onChange, 
+  options, 
+  label, 
+  error,
+  required 
+}: { 
+  value: string; 
+  onChange: (value: string) => void; 
+  options: string[];
+  label: string;
+  error?: string;
+  required?: boolean;
+}) => {
+  return (
+    <div className="relative w-full">
+      <Listbox value={value} onChange={onChange}>
+        {({ open }) => (
+          <>
+            <Listbox.Label className="absolute left-4 -top-6 text-sm text-gray-400 transition-all duration-300">
+              {label} {required && '*'}
+            </Listbox.Label>
+            <div className="relative w-full">
+              <Listbox.Button className="peer w-full min-h-[50px] px-4 py-3 text-white bg-gray-800/30 
+                border border-gray-700 rounded-lg transition-all duration-300 backdrop-blur-sm
+                hover:bg-gray-800/40 focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500/40
+                text-base sm:text-lg flex items-center justify-between group">
+                <span className={`truncate ${value ? 'text-white' : 'text-gray-500'}`}>
+                  {value || 'Select a subject'}
+                </span>
+                <ChevronUpDownIcon 
+                  className={`w-5 h-5 flex-shrink-0 text-gray-400 transform transition-all duration-300 ease-in-out delay-75
+                    group-hover:text-orange-500 ${open ? "rotate-180" : "rotate-0"}`}
+                  aria-hidden="true" 
+                />
+              </Listbox.Button>
+
+              <Transition
+                show={open}
+                as={Fragment}
+                enter="transition ease-out duration-200"
+                enterFrom="opacity-0 translate-y-2"
+                enterTo="opacity-100 translate-y-0"
+                leave="transition ease-in duration-150"
+                leaveFrom="opacity-100 translate-y-0"
+                leaveTo="opacity-0 translate-y-2"
+              >
+                <Listbox.Options className="absolute z-[100] w-full mt-2 bg-gray-800/95 backdrop-blur-lg
+                  border border-gray-700 rounded-lg py-1
+                  focus:outline-none text-base sm:text-lg
+                  transform-gpu shadow-xl shadow-orange-500/10 hover:shadow-orange-500/20
+                  transition-all duration-300 overflow-auto max-h-60">
+                  {options.map((option, index) => (
+                    <Listbox.Option
+                      key={index}
+                      value={option}
+                      className={({ active, selected }) =>
+                        `relative cursor-pointer select-none py-2.5 px-4 transition-all duration-200
+                        ${active ? 'bg-orange-500/20 text-orange-500' : 'text-gray-300'}
+                        ${selected ? 'bg-orange-500/10' : ''}
+                        hover:bg-orange-500/15 group`
+                      }
+                    >
+                      {({ selected, active }) => (
+                        <div className="flex items-center justify-between">
+                          <span className={`block truncate transition-all duration-200
+                            ${selected ? 'font-semibold text-orange-500' : ''}
+                            group-hover:text-orange-500`}>
+                            {option}
+                          </span>
+                          {selected && (
+                            <CheckIcon className={`w-5 h-5 ml-4 flex-shrink-0 transition-all duration-200
+                              ${active ? 'text-orange-500' : 'text-orange-500'}
+                              opacity-90 group-hover:opacity-100`} />
+                          )}
+                        </div>
+                      )}
+                    </Listbox.Option>
+                  ))}
+                </Listbox.Options>
+              </Transition>
+            </div>
+          </>
+        )}
+      </Listbox>
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          className="absolute -bottom-6 left-0 text-red-500 text-sm flex items-center gap-1"
+        >
+          <AlertCircle className="w-4 h-4" />
+          {error}
+        </motion.div>
+      )}
+    </div>
+  );
+};
+
+// Add FloatingBackground component
+const FloatingBackground = () => {
+  const prefersReducedMotion = useReducedMotion();
+  const elements = Array.from({ length: 3 }, (_, i) => i);
+
+  if (prefersReducedMotion) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
+    >
+      {elements.map((i) => (
+        <motion.div
+          key={i}
+          className="absolute w-[300px] h-[300px] rounded-full pointer-events-none"
+          style={{
+            background: 'radial-gradient(circle, rgba(251,146,60,0.03) 0%, transparent 70%)',
+            top: `${20 + i * 30}%`,
+            left: `${20 + i * 25}%`,
+          }}
+          animate={{
+            y: [0, -20, 0],
+            opacity: [0.5, 0.8, 0.5],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{
+            duration: 6 + i * 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: i * 2,
+          }}
+        />
+      ))}
+    </motion.div>
   );
 };
 
@@ -473,36 +528,40 @@ export default function Contact() {
   }, []);
 
   return (
-    <section className="relative py-16 md:py-24 bg-gradient-to-b from-gray-900 to-gray-800 overflow-hidden theme-transition">
+    <section className="relative py-8 sm:py-16 lg:py-24 bg-gradient-to-b from-gray-900 to-gray-800 overflow-hidden">
       <ContactSchema />
-      <div className="absolute inset-0 bg-gradient-radial from-orange-500/5 via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-grid-pattern opacity-5" />
+      <div className="absolute inset-0 bg-gradient-to-b from-gray-900/80 via-transparent to-gray-800/80 pointer-events-none" />
+      <FloatingBackground />
+      <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-orange-500/20 to-transparent" />
+      <div className="absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-transparent via-orange-500/20 to-transparent" />
       
-      <motion.div 
-        className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10"
+      <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10"
       >
-        <motion.div variants={itemVariants} className="text-center mb-12 md:mb-16 scroll-reveal">
-          <h2 className="text-5xl md:text-6xl font-bold bg-clip-text text-transparent 
-            bg-gradient-to-r from-orange-400 to-orange-600 mb-6
-            [text-shadow:_0_2px_10px_rgba(251,146,60,0.3)]">
-            Contact Us
+        <motion.div 
+          variants={itemVariants}
+          className="text-center mb-16"
+        >
+          <h2 className="title-primary mb-4">
+            Get in Touch
           </h2>
-          <p className="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto mb-8
-            [text-shadow:_0_1px_5px_rgba(255,255,255,0.1)]">
-            Get in touch with us for all your powder coating needs
+          <p className="subtitle-primary">
+            Have a question or ready to transform your project? We're here to help!
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-6 lg:gap-8">
           {/* Contact Info Section */}
-          <motion.div variants={itemVariants} className="lg:col-span-5 space-y-6">
-            <Card className="glass-card">
+          <motion.div variants={itemVariants} className="lg:col-span-5 space-y-4 sm:space-y-6">
+            <Card className="glass-card dark">
               <CardHeader>
-                <CardTitle className="text-2xl font-bold text-white">Get in Touch</CardTitle>
+                <CardTitle className="title-card">Get in Touch</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4 sm:space-y-6">
                 <ContactInfo
                   info={[
                     { icon: Phone, title: 'Phone', content: '(123) 456-7890', href: 'tel:+1234567890' },
@@ -515,7 +574,7 @@ export default function Contact() {
             </Card>
 
             {/* Map Section */}
-            <Card className="glass-card overflow-hidden">
+            <Card className="glass-card dark overflow-hidden">
               <CardContent className="p-0">
                 <div ref={iframeContainerRef} className="aspect-video relative">
                   {(shouldLoadIframe || iframeLoaded) ? (
@@ -523,7 +582,7 @@ export default function Contact() {
                       <iframe
                         ref={iframeRef}
                         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3000!2d-73.9877!3d40.7484!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zM40zMCcwNC44Ik4gNzPCsDU5JzE1LjciVw!5e0!3m2!1sen!2sus!4v1234567890&mode=dark"
-                        className="absolute inset-0 w-full h-full rounded-lg map-dark transition-opacity duration-300 hover:opacity-100"
+                        className="absolute inset-0 w-full h-full rounded-lg map-dark transition-opacity duration-300"
                         referrerPolicy="no-referrer-when-downgrade"
                         title="Our Location"
                         onLoad={() => setIframeLoaded(true)}
@@ -539,7 +598,7 @@ export default function Contact() {
                             repeat: Infinity,
                             repeatType: "reverse"
                           }}
-                          className="relative"
+                          className="relative map-marker"
                         >
                           <div className="absolute -inset-4 bg-orange-500/20 rounded-full animate-ping" />
                           <div className="relative">
@@ -549,7 +608,7 @@ export default function Contact() {
                       </div>
                     </>
                   ) : (
-                    <div className="absolute inset-0 map-skeleton" />
+                    <div className="absolute inset-0 map-skeleton loading-skeleton rounded-lg" />
                   )}
                 </div>
               </CardContent>
@@ -557,19 +616,28 @@ export default function Contact() {
           </motion.div>
 
           {/* Contact Form Section */}
-          <motion.div variants={itemVariants} className="lg:col-span-7">
-            <Card className="glass-card backdrop-blur-lg border border-gray-700/50">
+          <motion.div 
+            variants={itemVariants} 
+            className="lg:col-span-7"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
+          >
+            <Card className="glass-card dark">
               <CardHeader>
-                <CardTitle className="text-2xl font-bold text-white">Send us a Message</CardTitle>
+                <CardTitle className="title-card">Send us a Message</CardTitle>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                   <AnimatePresence mode="wait">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* Name Field */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                      {/* Form fields with improved mobile sizing and animations */}
                       <motion.div
                         variants={formFieldVariants}
-                        className="relative group"
+                        className="relative group expanding-input"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, ease: "easeOut", delay: 0.1 }}
                       >
                         <input
                           type="text"
@@ -577,9 +645,9 @@ export default function Contact() {
                           name="name"
                           value={formData.name}
                           onChange={handleChange}
-                          className="peer w-full px-4 py-3 text-white bg-gray-800/30 border border-gray-700 rounded-lg 
-                            focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300 
-                            backdrop-blur-sm placeholder-transparent"
+                          className="peer w-full min-h-[50px] px-4 py-3 text-white bg-gray-800/30 border border-gray-700 rounded-lg 
+                            focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500/40 transition-all duration-300 
+                            backdrop-blur-sm placeholder-transparent text-base sm:text-lg hover:bg-gray-800/40"
                           placeholder="Name"
                           required
                         />
@@ -605,10 +673,13 @@ export default function Contact() {
                         )}
                       </motion.div>
 
-                      {/* Email Field */}
+                      {/* Email field with animation */}
                       <motion.div
                         variants={formFieldVariants}
-                        className="relative group"
+                        className="relative group expanding-input"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, ease: "easeOut", delay: 0.2 }}
                       >
                         <input
                           type="email"
@@ -616,9 +687,9 @@ export default function Contact() {
                           name="email"
                           value={formData.email}
                           onChange={handleChange}
-                          className="peer w-full px-4 py-3 text-white bg-gray-800/30 border border-gray-700 rounded-lg 
-                            focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300 
-                            backdrop-blur-sm placeholder-transparent"
+                          className="peer w-full min-h-[50px] px-4 py-3 text-white bg-gray-800/30 border border-gray-700 rounded-lg 
+                            focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500/40 transition-all duration-300 
+                            backdrop-blur-sm placeholder-transparent text-base sm:text-lg hover:bg-gray-800/40"
                           placeholder="Email"
                           required
                         />
@@ -644,10 +715,13 @@ export default function Contact() {
                         )}
                       </motion.div>
 
-                      {/* Phone Field */}
+                      {/* Phone field with animation */}
                       <motion.div
                         variants={formFieldVariants}
-                        className="relative group"
+                        className="relative group expanding-input"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, ease: "easeOut", delay: 0.3 }}
                       >
                         <input
                           type="tel"
@@ -655,9 +729,9 @@ export default function Contact() {
                           name="phone"
                           value={formData.phone}
                           onChange={handleChange}
-                          className="peer w-full px-4 py-3 text-white bg-gray-800/30 border border-gray-700 rounded-lg 
-                            focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300 
-                            backdrop-blur-sm placeholder-transparent"
+                          className="peer w-full min-h-[50px] px-4 py-3 text-white bg-gray-800/30 border border-gray-700 rounded-lg 
+                            focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500/40 transition-all duration-300 
+                            backdrop-blur-sm placeholder-transparent text-base sm:text-lg hover:bg-gray-800/40"
                           placeholder="Phone"
                         />
                         <label
@@ -671,34 +745,58 @@ export default function Contact() {
                         </label>
                       </motion.div>
 
-                      {/* Subject Field */}
+                      {/* Subject field with animation */}
                       <motion.div
                         variants={formFieldVariants}
-                        className="relative group"
+                        className="relative group expanding-input"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, ease: "easeOut", delay: 0.4 }}
                       >
-                        <select
-                          id="subject"
-                          name="subject"
+                        <ModernDropdown
                           value={formData.subject}
-                          onChange={handleChange}
-                          className="peer w-full px-4 py-3 text-white bg-gray-800/30 border border-gray-700 rounded-lg 
-                            focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300 
-                            backdrop-blur-sm"
+                          onChange={(value) => {
+                            handleChange({
+                              target: { name: 'subject', value }
+                            } as React.ChangeEvent<HTMLSelectElement>);
+                          }}
+                          options={subjectOptions}
+                          label="Subject"
+                          error={errors.subject}
                           required
-                        >
-                          <option value="">Select a subject</option>
-                          {subjectOptions.map(option => (
-                            <option key={option} value={option}>{option}</option>
-                          ))}
-                        </select>
+                        />
+                      </motion.div>
+
+                      {/* Message field with animation */}
+                      <motion.div
+                        variants={formFieldVariants}
+                        className="relative group expanding-input sm:col-span-2"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, ease: "easeOut", delay: 0.5 }}
+                      >
+                        <textarea
+                          id="message"
+                          name="message"
+                          value={formData.message}
+                          onChange={handleChange}
+                          rows={6}
+                          className="peer w-full px-4 py-3 text-white bg-gray-800/30 border border-gray-700 rounded-lg 
+                            focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500/40 transition-all duration-300 
+                            backdrop-blur-sm placeholder-transparent resize-none text-base sm:text-lg hover:bg-gray-800/40"
+                          placeholder="Message"
+                          required
+                        />
                         <label
-                          htmlFor="subject"
-                          className="absolute left-4 -top-6 text-sm text-gray-400
+                          htmlFor="message"
+                          className="absolute left-4 -top-6 text-sm text-gray-400 peer-placeholder-shown:text-base
+                            peer-placeholder-shown:text-gray-500 peer-placeholder-shown:top-3.5
+                            peer-focus:-top-6 peer-focus:text-sm peer-focus:text-orange-500
                             transition-all duration-300"
                         >
-                          Subject *
+                          Message *
                         </label>
-                        {errors.subject && (
+                        {errors.message && (
                           <motion.div
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -706,89 +804,52 @@ export default function Contact() {
                             className="absolute -bottom-6 left-0 text-red-500 text-sm flex items-center gap-1"
                           >
                             <AlertCircle className="w-4 h-4" />
-                            {errors.subject}
+                            {errors.message}
                           </motion.div>
                         )}
                       </motion.div>
-                    </div>
 
-                    {/* Message Field */}
-                    <motion.div
-                      variants={formFieldVariants}
-                      className="relative group mt-6"
-                    >
-                      <textarea
-                        id="message"
-                        name="message"
-                        value={formData.message}
-                        onChange={handleChange}
-                        rows={6}
-                        className="peer w-full px-4 py-3 text-white bg-gray-800/30 border border-gray-700 rounded-lg 
-                          focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-300 
-                          backdrop-blur-sm placeholder-transparent resize-none"
-                        placeholder="Message"
-                        required
-                      />
-                      <label
-                        htmlFor="message"
-                        className="absolute left-4 -top-6 text-sm text-gray-400 peer-placeholder-shown:text-base
-                          peer-placeholder-shown:text-gray-500 peer-placeholder-shown:top-3.5
-                          peer-focus:-top-6 peer-focus:text-sm peer-focus:text-orange-500
-                          transition-all duration-300"
+                      {/* Submit button with enhanced hover effect */}
+                      <motion.div 
+                        className="pt-6 sm:col-span-2"
+                        variants={formFieldVariants}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, ease: "easeOut", delay: 0.6 }}
                       >
-                        Message *
-                      </label>
-                      {errors.message && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          className="absolute -bottom-6 left-0 text-red-500 text-sm flex items-center gap-1"
+                        <motion.button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="button-primary relative w-full min-h-[50px] py-3 px-6
+                            disabled:opacity-70 disabled:cursor-not-allowed group overflow-hidden
+                            text-base sm:text-lg send-button"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
                         >
-                          <AlertCircle className="w-4 h-4" />
-                          {errors.message}
-                        </motion.div>
-                      )}
-                    </motion.div>
-
-                    <motion.div 
-                      className="pt-6"
-                      variants={formFieldVariants}
-                    >
-                      <motion.button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="relative w-full py-3 px-6 bg-gradient-to-r from-orange-500 to-orange-600
-                          hover:from-orange-600 hover:to-orange-700 text-white font-semibold rounded-lg
-                          shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30
-                          transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]
-                          disabled:opacity-70 disabled:cursor-not-allowed group overflow-hidden"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <motion.span
-                          className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0
-                            translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"
-                        />
-                        <span className="flex items-center justify-center gap-2">
-                          {isSubmitting ? (
-                            <>
-                              <motion.div
-                                className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"
-                                animate={{ rotate: 360 }}
-                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                              />
-                              Sending...
-                            </>
-                          ) : (
-                            <>
-                              Send Message
-                              <ArrowRight className="w-5 h-5" />
-                            </>
-                          )}
-                        </span>
-                      </motion.button>
-                    </motion.div>
+                          <motion.span
+                            className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0
+                              translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"
+                          />
+                          <span className="relative flex items-center justify-center gap-2">
+                            {isSubmitting ? (
+                              <>
+                                <motion.div
+                                  className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"
+                                  animate={{ rotate: 360 }}
+                                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                />
+                                Sending...
+                              </>
+                            ) : (
+                              <>
+                                Send Message
+                                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                              </>
+                            )}
+                          </span>
+                        </motion.button>
+                      </motion.div>
+                    </div>
                   </AnimatePresence>
                 </form>
               </CardContent>
@@ -797,10 +858,11 @@ export default function Contact() {
         </div>
       </motion.div>
 
-      {/* Live Chat Button with keyboard shortcut hint */}
+      {/* Live Chat Button with improved mobile positioning */}
       <motion.button
         ref={chatButtonRef}
-        className="live-chat-button group"
+        className="button-secondary live-chat-button group fixed bottom-4 sm:bottom-8 right-4 sm:right-8 z-50
+          min-h-[50px] min-w-[50px] flex items-center justify-center"
         onClick={() => setIsChatOpen(!isChatOpen)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -816,7 +878,7 @@ export default function Contact() {
         </div>
       </motion.button>
 
-      {/* Live Chat Modal with improved accessibility */}
+      {/* Live Chat Modal with improved mobile layout */}
       <AnimatePresence>
         {isChatOpen && (
           <motion.div
@@ -828,7 +890,8 @@ export default function Contact() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-24 right-8 w-80 bg-gray-900 rounded-lg shadow-xl border border-gray-800 z-50"
+            className="fixed bottom-20 sm:bottom-24 right-4 sm:right-8 w-[calc(100%-2rem)] sm:w-80 
+              bg-gray-900 rounded-lg shadow-xl border border-gray-800 z-50"
           >
             <div className="p-4">
               <div className="flex justify-between items-center mb-4">

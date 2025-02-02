@@ -4,7 +4,7 @@ import Navigation from './components/Navigation';
 import Footer from './components/Footer';
 import Hero from './components/Hero';
 import Services from './components/Services';
-import Portfolio from './components/portfolio/Portfolio';
+import Portfolio from './components/Portfolio';
 import Contact from './components/Contact';
 import Testimonials from './components/Testimonials';
 import FAQ from './components/FAQ';

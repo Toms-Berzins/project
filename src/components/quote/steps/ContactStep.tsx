@@ -43,20 +43,20 @@ export const ContactStep = ({
   const total = subtotal + addonsTotal;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div className="grid grid-cols-1 gap-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
         className="space-y-8"
       >
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <div className={inputContainerClasses}>
             <input
               type="text"
               value={formData.contact.name}
               onChange={(e) => updateFormData('contact.name', e.target.value)}
-              className={`${commonInputClasses} ${errors.name ? errorInputClasses : ''}`}
+              className={`${commonInputClasses} ${errors.name ? errorInputClasses : ''} py-3 sm:py-2`}
               placeholder="Enter your name"
             />
             <label className={floatingLabelClasses}>
@@ -72,7 +72,7 @@ export const ContactStep = ({
               type="tel"
               value={formData.contact.phone}
               onChange={(e) => updateFormData('contact.phone', e.target.value)}
-              className={`${commonInputClasses} ${errors.phone ? errorInputClasses : ''}`}
+              className={`${commonInputClasses} ${errors.phone ? errorInputClasses : ''} py-3 sm:py-2`}
               placeholder="Enter your phone number"
             />
             <label className={floatingLabelClasses}>
@@ -89,7 +89,7 @@ export const ContactStep = ({
             type="email"
             value={formData.contact.email}
             onChange={(e) => updateFormData('contact.email', e.target.value)}
-            className={`${commonInputClasses} ${errors.email ? errorInputClasses : ''}`}
+            className={`${commonInputClasses} ${errors.email ? errorInputClasses : ''} py-3 sm:py-2`}
             placeholder="Enter your email"
           />
           <label className={floatingLabelClasses}>
@@ -105,7 +105,7 @@ export const ContactStep = ({
             value={formData.contact.comments}
             onChange={(e) => updateFormData('contact.comments', e.target.value)}
             rows={4}
-            className={`${commonInputClasses} min-h-[120px] resize-y`}
+            className={`${commonInputClasses} min-h-[120px] resize-y py-3 sm:py-2`}
             placeholder="Any special instructions or requirements?"
           />
           <label className={floatingLabelClasses}>
@@ -114,17 +114,79 @@ export const ContactStep = ({
         </div>
 
         <div className="flex justify-end">
-          <button
+          <motion.button
             type="button"
             onClick={(e) => onNext(e)}
-            className="flex items-center bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg transition-colors"
+            whileTap={{ scale: 0.97 }}
+            className="flex items-center bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 sm:py-2 min-h-[50px] rounded-lg transition-colors w-full sm:w-auto justify-center sm:justify-start"
           >
             Submit Quote
             <ArrowRight className="ml-2 w-4 h-4" />
-          </button>
+          </motion.button>
         </div>
       </motion.div>
 
+      {/* Mobile Price Summary */}
+      <div className="block md:hidden">
+        <motion.details
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg rounded-xl shadow-xl"
+        >
+          <summary className="text-lg font-semibold p-4 cursor-pointer text-gray-900 dark:text-white">
+            View Price Breakdown
+          </summary>
+          <div className="px-4 pb-4">
+            <PriceSummary
+              basePrice={basePrice}
+              items={[
+                {
+                  label: 'Material',
+                  amount: basePrice * formData.quantity,
+                  details: selectedMaterial?.name
+                },
+                ...(selectedCoating ? [{
+                  label: 'Coating',
+                  amount: coatingPrice * formData.quantity,
+                  details: selectedCoating.name
+                }] : []),
+                ...(selectedFinish ? [{
+                  label: 'Finish',
+                  amount: finishPrice * formData.quantity,
+                  details: selectedFinish.name
+                }] : []),
+                ...(selectedColor && colorMultiplier > 1 ? [{
+                  label: 'Color Premium',
+                  amount: ((basePrice + coatingPrice + finishPrice) * (colorMultiplier - 1)) * formData.quantity,
+                  details: selectedColor.name
+                }] : []),
+                ...(addonsTotal > 0 ? [{
+                  label: 'Add-ons',
+                  amount: addonsTotal,
+                  details: formData.addons
+                    .map(id => addons.find(a => a.id === id)?.name)
+                    .filter(Boolean)
+                    .join(', ')
+                }] : [])
+              ]}
+              priceBreakdown={{
+                subtotal: total,
+                bulkDiscount: 0,
+                bundleDiscount: 0,
+                seasonalDiscount: 0,
+                total: total,
+                appliedDiscounts: []
+              }}
+              quantity={formData.quantity}
+              onApplyPromo={() => {}}
+              onRemovePromo={() => {}}
+            />
+          </div>
+        </motion.details>
+      </div>
+
+      {/* Desktop Price Summary */}
       <div className="hidden md:block">
         <PriceSummary
           basePrice={basePrice}

@@ -6,6 +6,7 @@ interface EmailData {
   formData: FormData;
   priceBreakdown: PriceBreakdown;
   quoteReference: string;
+  isGuest?: boolean;
 }
 
 export const sendQuoteEmail = async (data: EmailData) => {

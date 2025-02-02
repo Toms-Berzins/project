@@ -40,7 +40,7 @@ export const CoatingStep = ({
   const finishPrice = selectedFinish?.priceAdd || 0;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div className="grid grid-cols-1 gap-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -51,7 +51,7 @@ export const CoatingStep = ({
           <select
             value={formData.coating.type}
             onChange={(e) => updateFormData('coating.type', e.target.value)}
-            className={`${selectClasses} ${errors.coatingType ? errorInputClasses : ''}`}
+            className={`${selectClasses} ${errors.coatingType ? errorInputClasses : ''} py-3 sm:py-2`}
             aria-label="Coating Type"
             title="Select coating type"
           >
@@ -74,7 +74,7 @@ export const CoatingStep = ({
           <select
             value={formData.coating.finish}
             onChange={(e) => updateFormData('coating.finish', e.target.value)}
-            className={`${selectClasses} ${errors.finish ? errorInputClasses : ''}`}
+            className={`${selectClasses} ${errors.finish ? errorInputClasses : ''} py-3 sm:py-2`}
             aria-label="Finish Type"
             title="Select finish type"
           >
@@ -94,17 +94,66 @@ export const CoatingStep = ({
         </div>
 
         <div className="flex justify-end">
-          <button
+          <motion.button
             type="button"
             onClick={onNext}
-            className="flex items-center bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg transition-colors"
+            whileTap={{ scale: 0.97 }}
+            className="flex items-center bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 sm:py-2 min-h-[50px] rounded-lg transition-colors w-full sm:w-auto justify-center sm:justify-start"
           >
             Next
             <ArrowRight className="ml-2 w-4 h-4" />
-          </button>
+          </motion.button>
         </div>
       </motion.div>
 
+      {/* Mobile Price Summary */}
+      <div className="block md:hidden">
+        <motion.details
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="overflow-hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg rounded-xl shadow-xl"
+        >
+          <summary className="text-lg font-semibold p-4 cursor-pointer text-gray-900 dark:text-white">
+            View Price Breakdown
+          </summary>
+          <div className="px-4 pb-4">
+            <PriceSummary
+              basePrice={basePrice}
+              items={[
+                {
+                  label: 'Material',
+                  amount: basePrice * formData.quantity,
+                  details: selectedMaterial?.name
+                },
+                ...(selectedCoating ? [{
+                  label: 'Coating',
+                  amount: coatingPrice * formData.quantity,
+                  details: selectedCoating.name
+                }] : []),
+                ...(selectedFinish ? [{
+                  label: 'Finish',
+                  amount: finishPrice * formData.quantity,
+                  details: selectedFinish.name
+                }] : [])
+              ]}
+              priceBreakdown={{
+                subtotal: (basePrice + coatingPrice + finishPrice) * formData.quantity,
+                bulkDiscount: 0,
+                bundleDiscount: 0,
+                seasonalDiscount: 0,
+                total: (basePrice + coatingPrice + finishPrice) * formData.quantity,
+                appliedDiscounts: []
+              }}
+              quantity={formData.quantity}
+              onApplyPromo={() => {}}
+              onRemovePromo={() => {}}
+            />
+          </div>
+        </motion.details>
+      </div>
+
+      {/* Desktop Price Summary */}
       <div className="hidden md:block">
         <PriceSummary
           basePrice={basePrice}

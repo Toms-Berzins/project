@@ -159,8 +159,7 @@ function ServiceCard({ title, description, icon, features, index }: ServiceCardP
           </motion.div>
           <div className="flex-1 flex flex-col relative z-10">
             <motion.h3 
-              className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-2 sm:mb-3 lg:mb-4
-                [text-shadow:_0_1px_2px_rgba(0,0,0,0.1)]"
+              className="title-card mb-2 sm:mb-3 lg:mb-4"
               animate={!prefersReducedMotion ? {
                 x: isHovered ? 8 : 0,
                 color: isHovered ? '#fb923c' : '#ffffff'
@@ -170,8 +169,7 @@ function ServiceCard({ title, description, icon, features, index }: ServiceCardP
               {title}
             </motion.h3>
             <motion.p 
-              className="text-gray-300 mb-4 sm:mb-6 lg:mb-8 h-auto sm:h-[60px] lg:h-[72px] 
-                line-clamp-3 text-sm sm:text-base"
+              className="subtitle-card mb-4 sm:mb-6 lg:mb-8 h-auto sm:h-[60px] lg:h-[72px] line-clamp-3"
               animate={!prefersReducedMotion ? {
                 x: isHovered ? 8 : 0
               } : {}}
@@ -356,16 +354,13 @@ export default function Services() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 sm:mb-12 lg:mb-16">
           <ProgressiveText delay={0.2}>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-clip-text text-transparent 
-              bg-gradient-to-r from-orange-400 to-orange-600 mb-4 sm:mb-6
-              [text-shadow:_0_2px_10px_rgba(251,146,60,0.3)]">
+            <h2 className="title-primary mb-4 sm:mb-6">
               Our Services
             </h2>
           </ProgressiveText>
           
           <ProgressiveText delay={0.4} className="max-w-2xl mx-auto">
-            <p className="text-lg sm:text-xl text-gray-300 mb-6 sm:mb-8
-              [text-shadow:_0_1px_5px_rgba(255,255,255,0.1)]">
+            <p className="subtitle-primary mb-6 sm:mb-8">
               Discover our comprehensive range of powder coating solutions tailored to your needs.
             </p>
           </ProgressiveText>
