@@ -1,5 +1,6 @@
 import React from 'react';
 import { twMerge } from 'tailwind-merge';
+import { motion } from 'framer-motion';
 
 type PaddingSize = 'none' | 'sm' | 'md' | 'lg';
 type CardVariant = 'default' | 'hover' | 'interactive';
@@ -23,23 +24,26 @@ const Card: React.FC<CardProps> = ({
   onMouseEnter,
   onMouseLeave
 }) => {
-  const baseStyles = "bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700";
+  const baseStyles = "bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 min-h-[100px]";
   
   const variants: Record<CardVariant, string> = {
-    default: "shadow-md dark:shadow-gray-900/30",
-    hover: "shadow-md hover:shadow-xl transition-all duration-300 dark:shadow-gray-900/30 dark:hover:shadow-gray-900/40",
-    interactive: "shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer dark:shadow-gray-900/30 dark:hover:shadow-gray-900/40"
+    default: "shadow-md dark:shadow-gray-900/30 transition-all",
+    hover: "shadow-md sm:hover:shadow-lg transition-all duration-300 dark:shadow-gray-900/30",
+    interactive: "shadow-md sm:hover:shadow-xl sm:hover:shadow-orange-500/20 sm:active:scale-[0.97] transition-all cursor-pointer dark:shadow-gray-900/30"
   };
 
   const paddings: Record<PaddingSize, string> = {
     none: "",
-    sm: "p-4",
-    md: "p-6",
-    lg: "p-8"
+    sm: "p-3 sm:p-4 lg:p-6",
+    md: "p-4 sm:p-6 lg:p-8",
+    lg: "p-6 sm:p-8 lg:p-10"
   };
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut", delay: 0.1 }}
       className={twMerge(
         baseStyles,
         variants[variant],
@@ -56,7 +60,7 @@ const Card: React.FC<CardProps> = ({
       }}
     >
       {children}
-    </div>
+    </motion.div>
   );
 };
 
@@ -73,7 +77,7 @@ export const CardTitle: React.FC<{ children: React.ReactNode; className?: string
   children, 
   className 
 }) => (
-  <h3 className={twMerge("text-xl font-semibold text-gray-900 dark:text-gray-100", className)}>
+  <h3 className={twMerge("text-xl font-semibold text-gray-900 dark:text-gray-50", className)}>
     {children}
   </h3>
 );
@@ -82,7 +86,7 @@ export const CardDescription: React.FC<{ children: React.ReactNode; className?: 
   children, 
   className 
 }) => (
-  <p className={twMerge("text-sm text-gray-600 dark:text-gray-300", className)}>
+  <p className={twMerge("text-sm text-gray-700 dark:text-gray-300", className)}>
     {children}
   </p>
 );

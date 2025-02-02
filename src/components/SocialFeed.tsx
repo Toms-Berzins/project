@@ -335,7 +335,7 @@ export default function SocialFeed({ platform = 'all', limit = 4, className = ''
     visible: { opacity: 1, y: 0 },
     hover: shouldReduceMotion ? {} : { 
       scale: 1.02,
-      boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.15)",
+      boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.2)",
       transition: { duration: 0.2 }
     }
   };
@@ -459,7 +459,7 @@ export default function SocialFeed({ platform = 'all', limit = 4, className = ''
               initial="hidden"
               animate="visible"
               variants={cardVariants}
-              className="rounded-xl aspect-video animate-pulse bg-white/5"
+              className="rounded-xl aspect-video animate-pulse bg-gray-800/30"
             />
           ))}
         </div>
@@ -481,7 +481,7 @@ export default function SocialFeed({ platform = 'all', limit = 4, className = ''
             {posts.map((post) => (
               <motion.div 
                 key={post.postId}
-                className={`rounded-xl overflow-hidden shadow-lg
+                className={`bg-gray-800/10 backdrop-blur-sm rounded-xl overflow-hidden border border-white/5
                   ${isMobile ? 'flex-shrink-0 w-[85vw] snap-center' : ''}`}
                 variants={cardVariants}
                 initial="hidden"
@@ -494,7 +494,7 @@ export default function SocialFeed({ platform = 'all', limit = 4, className = ''
                 aria-label={`Social media post from ${post.platform} by ${post.authorUsername}`}
               >
                 {/* Post Header */}
-                <div className="p-4 flex items-center justify-between border-b border-gray-700/50">
+                <div className="p-4 flex items-center justify-between border-b border-gray-700/20">
                   <div className="flex items-center gap-3">
                     <motion.div 
                       className={`p-2 rounded-lg ${

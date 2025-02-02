@@ -171,10 +171,16 @@ const FAQ = () => {
 
     if (targetCategory && questionIndex !== -1) {
       setSelectedCategory(targetCategory);
-      // Wait for the category to be selected and scrolled before opening the question
+      setOpenQuestion({ category: targetCategory, index: questionIndex });
+      
+      // Wait for state updates and DOM to reflect changes
       setTimeout(() => {
-        setOpenQuestion({ category: targetCategory, index: questionIndex });
-        scrollToCategory(targetCategory);
+        const element = categoryRefs.current[targetCategory];
+        if (element) {
+          const offset = 100; // Offset for fixed header
+          element.scrollIntoView({ behavior: 'smooth' });
+          window.scrollBy(0, -offset); // Adjust for the offset
+        }
       }, 100);
     }
   };
