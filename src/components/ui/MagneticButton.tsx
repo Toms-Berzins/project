@@ -117,8 +117,9 @@ export default function MagneticButton({
       {ripples.map(({ x, y, id }) => (
         <span
           key={id}
-          className="ripple-effect animate-ripple"
-          style={{ left: `${x}px`, top: `${y}px` }}
+          className={`ripple-effect animate-ripple`}
+          data-x={x}
+          data-y={y}
         />
       ))}
       {children}

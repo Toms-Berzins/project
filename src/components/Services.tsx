@@ -169,7 +169,7 @@ function ServiceCard({ title, description, icon, features, index }: ServiceCardP
               {title}
             </motion.h3>
             <motion.p 
-              className="subtitle-card mb-4 sm:mb-6 lg:mb-8 h-auto sm:h-[60px] lg:h-[72px] line-clamp-3"
+              className="subtitle-card mb-4 sm:mb-6 lg:mb-8"
               animate={!prefersReducedMotion ? {
                 x: isHovered ? 8 : 0
               } : {}}

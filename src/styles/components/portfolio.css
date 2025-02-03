@@ -12,6 +12,26 @@
   background-image: url('/noise.png');
 }
 
+/* Glass Panel Styles */
+.glass-panel {
+  @apply relative backdrop-blur-xl bg-opacity-20 
+    transition-all duration-300;
+}
+
+.glass-panel:hover {
+  @apply transform shadow-lg;
+}
+
+.glass-panel::before {
+  content: '';
+  @apply absolute inset-0 bg-gradient-to-br from-white/5 to-transparent 
+    rounded-xl opacity-0 transition-opacity duration-300;
+}
+
+.glass-panel:hover::before {
+  @apply opacity-100;
+}
+
 /* Portfolio Header */
 .portfolio-title {
   @apply text-4xl md:text-5xl font-bold bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 

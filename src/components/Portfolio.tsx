@@ -1,7 +1,8 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaArrowUp } from 'react-icons/fa';
-import { ArrowRight, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import { InteractiveButton } from './ui/InteractiveButton';
 import '../styles/components.css';
 
 interface PortfolioItem {
@@ -106,103 +107,41 @@ const FloatingBackground = () => {
   );
 };
 
-interface InteractiveButtonProps {
-  onClick?: () => void;
-  className?: string;
-  disabled?: boolean;
-  children: React.ReactNode;
-}
+// Lazy load the modal component
+const PortfolioModal = lazy(() => import('../components/portfolio/PortfolioModal'));
 
-function InteractiveButton({ onClick, className = "", disabled = false, children }: InteractiveButtonProps) {
-  const [loading, setLoading] = useState(false);
-  const [ripple, setRipple] = useState<{ x: number; y: number } | null>(null);
-
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (disabled || loading) return;
-    
-    const rect = e.currentTarget.getBoundingClientRect();
-    setRipple({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-    setTimeout(() => setRipple(null), 600);
-    
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      onClick?.();
-    }, 1000);
-  };
-
-  return (
-    <motion.button
-      onClick={handleClick}
-      disabled={disabled || loading}
-      className={`relative overflow-hidden transform-gpu touch-manipulation ${className}`}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      initial={false}
+// Loading spinner component for modal
+const LoadingSpinner = () => (
+  <div className="fixed inset-0 bg-black/95 backdrop-blur-md flex items-center justify-center">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="text-orange-500"
     >
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-orange-500 to-orange-600"
-        animate={{
-          opacity: loading || disabled ? 0.7 : 1,
-        }}
-      />
-      
-      {ripple && (
-        <motion.span
-          className="absolute bg-white/30 rounded-full"
-          initial={{ scale: 0, width: 100, height: 100, x: ripple.x - 50, y: ripple.y - 50 }}
-          animate={{ scale: 4, opacity: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-        />
-      )}
-
-      <motion.div 
-        className="relative flex items-center justify-center gap-2 py-3 px-6"
-        animate={{
-          opacity: loading ? 0 : 1,
-        }}
-      >
-        {children}
-        <motion.div
-          animate={{ x: loading ? -4 : 0 }}
-          transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        >
-          <ArrowRight className="w-5 h-5" />
-        </motion.div>
-      </motion.div>
-
-      {loading && (
-        <motion.div 
-          className="absolute inset-0 flex items-center justify-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        >
-          <Loader2 className="w-5 h-5 animate-spin" />
-        </motion.div>
-      )}
-    </motion.button>
-  );
-}
+      <Loader2 className="w-8 h-8 animate-spin" />
+    </motion.div>
+  </div>
+);
 
 const Portfolio = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
-  const [ripples, setRipples] = useState<{ x: number; y: number; id: number }[]>([]);
   const [visibleItems, setVisibleItems] = useState(6);
   const [showScroll, setShowScroll] = useState(false);
-  const nextRippleId = useRef(0);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const modalCloseTimeoutRef = useRef<NodeJS.Timeout>();
 
   const categories = ['All', ...new Set(portfolioItems.map(item => item.category))];
   const filteredItems = selectedCategory === 'All' 
     ? portfolioItems 
     : portfolioItems.filter(item => item.category === selectedCategory);
 
-  // Reset visible items when category changes
   useEffect(() => {
     setVisibleItems(6);
   }, [selectedCategory]);
 
-  // Handle scroll for Back to Top button
   useEffect(() => {
     const handleScroll = () => {
       setShowScroll(window.scrollY > 300);
@@ -211,18 +150,42 @@ const Portfolio = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Handle modal keyboard interactions with debounce
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && selectedItem) {
+        // Clear any existing timeout
+        if (modalCloseTimeoutRef.current) {
+          clearTimeout(modalCloseTimeoutRef.current);
+        }
+        // Set new timeout for delayed close
+        modalCloseTimeoutRef.current = setTimeout(() => {
+          setSelectedItem(null);
+        }, 150);
+      }
+    };
+
+    if (selectedItem) {
+      previousFocusRef.current = document.activeElement as HTMLElement;
+      setTimeout(() => closeButtonRef.current?.focus(), 100);
+      window.addEventListener("keydown", handleKeyDown);
+    } else {
+      setTimeout(() => previousFocusRef.current?.focus(), 100);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      if (modalCloseTimeoutRef.current) {
+        clearTimeout(modalCloseTimeoutRef.current);
+      }
+    };
+  }, [selectedItem]);
+
   const handleLoadMore = () => {
     setVisibleItems(prev => prev + 6);
   };
 
-  const handleItemClick = useCallback((item: PortfolioItem, e: React.MouseEvent) => {
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const rippleX = e.clientX - rect.left;
-    const rippleY = e.clientY - rect.top;
-    
-    setRipples(prev => [...prev, { x: rippleX, y: rippleY, id: nextRippleId.current }]);
-    nextRippleId.current += 1;
-    
+  const handleItemClick = useCallback((item: PortfolioItem) => {
     setSelectedItem(item);
   }, []);
 
@@ -266,12 +229,12 @@ const Portfolio = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="text-center mb-16 md:mb-20"
+          className="text-center mb-8 md:mb-12 lg:mb-16"
         >
           <motion.h2 className="title-primary mb-4">
             Our Portfolio
           </motion.h2>
-          <p className="subtitle-primary">
+          <p className="subtitle-primary max-w-2xl mx-auto">
             Explore our diverse range of custom furniture and designs
           </p>
         </motion.div>
@@ -280,13 +243,22 @@ const Portfolio = () => {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-          className="flex flex-wrap justify-center gap-3 mb-12 md:mb-16 px-2"
+          className="flex flex-wrap justify-center gap-2 md:gap-3 mb-8 md:mb-12 lg:mb-16 px-2"
+          role="tablist"
+          aria-label="Portfolio categories"
         >
           {categories.map(category => (
             <InteractiveButton
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`${selectedCategory === category ? 'button-secondary-active' : 'button-secondary'}`}
+              className={`glass-panel px-4 py-2 rounded-xl transition-all duration-300
+                ${selectedCategory === category 
+                  ? 'bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 shadow-lg shadow-orange-500/10' 
+                  : 'bg-gray-900/50 hover:bg-gray-800/70 text-gray-400 hover:text-gray-300'} 
+                backdrop-blur-lg border border-gray-800 hover:border-orange-500/30 
+                min-w-[90px] md:min-w-[100px] text-sm font-medium`}
+              aria-selected={selectedCategory === category}
+              role="tab"
             >
               {category}
             </InteractiveButton>
@@ -297,54 +269,50 @@ const Portfolio = () => {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="grid-layout"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8"
+          style={{ gridAutoRows: 'minmax(200px, auto)' }}
         >
           {filteredItems.slice(0, visibleItems).map((item) => (
             <motion.div
               key={item.id}
               variants={itemVariants}
               className="glass-panel hover-lift aspect-[4/3] rounded-xl overflow-hidden cursor-pointer group"
-              onClick={(e) => handleItemClick(item, e)}
+              onClick={() => handleItemClick(item)}
+              role="button"
+              aria-label={`View details for ${item.title}`}
+              aria-expanded={selectedItem?.id === item.id}
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleItemClick(item);
+                }
+              }}
             >
               <img 
                 src={item.image} 
-                alt={item.title} 
+                alt={item.title}
                 loading="lazy"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent 
-                opacity-0 group-hover:opacity-100 transition-all duration-300" />
-              <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-full group-hover:translate-y-0 
-                transition-transform duration-300 flex flex-col gap-2">
-                <h3 className="title-card">{item.title}</h3>
+              <div 
+                className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent 
+                  opacity-0 group-hover:opacity-100 transition-all duration-300"
+              />
+              <div 
+                className="absolute bottom-0 left-0 right-0 p-4 md:p-6 translate-y-full group-hover:translate-y-0 
+                  transition-transform duration-300 flex flex-col gap-2"
+              >
+                <h3 className="title-card text-lg md:text-xl lg:text-2xl">{item.title}</h3>
                 <div className="flex items-center gap-2">
                   <span className="px-3 py-1 bg-orange-500/20 rounded-full text-orange-400 text-sm">
                     {item.category}
                   </span>
                 </div>
-                <p className="subtitle-card line-clamp-2 mt-1">
+                <p className="subtitle-card line-clamp-2 mt-1 text-sm md:text-base">
                   {item.description.split('.')[0]}.
                 </p>
               </div>
-              <AnimatePresence>
-                {ripples.map(ripple => (
-                  <motion.span
-                    key={ripple.id}
-                    initial={{ scale: 0, opacity: 0.5 }}
-                    animate={{ scale: 2, opacity: 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.4 }}
-                    className="absolute rounded-full bg-orange-500/20"
-                    style={{
-                      left: ripple.x,
-                      top: ripple.y,
-                      width: 50,
-                      height: 50,
-                      transform: 'translate(-50%, -50%)'
-                    }}
-                  />
-                ))}
-              </AnimatePresence>
             </motion.div>
           ))}
         </motion.div>
@@ -354,11 +322,15 @@ const Portfolio = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex justify-center mt-16"
+            className="flex justify-center mt-8 md:mt-12 lg:mt-16"
           >
             <InteractiveButton
               onClick={handleLoadMore}
-              className="button-primary px-8"
+              className="glass-panel bg-orange-500/20 hover:bg-orange-500/30
+                backdrop-blur-lg shadow-lg shadow-orange-500/10 text-orange-400
+                border border-gray-800 hover:border-orange-500/30
+                min-w-[160px] px-6 py-2.5 rounded-xl text-sm font-medium
+                transition-all duration-300"
             >
               Load More Projects
             </InteractiveButton>
@@ -375,13 +347,14 @@ const Portfolio = () => {
             initial={{ opacity: 0, scale: 0.5, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.5, y: 20 }}
-            whileHover={{ scale: 1.1, y: -2 }}
+            whileHover={{ scale: 1.2, y: -4 }}
             whileTap={{ scale: 0.9 }}
             onClick={scrollToTop}
-            className="button-primary fixed bottom-6 right-6 p-4 rounded-full z-50 backdrop-blur-sm"
+            className="button-primary fixed bottom-4 md:bottom-6 right-4 md:right-6 p-3 md:p-4 rounded-full z-50 
+              backdrop-blur-[5px] shadow-lg hover:shadow-xl transition-shadow duration-300"
             aria-label="Scroll to top"
           >
-            <FaArrowUp className="w-5 h-5" />
+            <FaArrowUp className="w-4 h-4 md:w-5 md:h-5" />
             <motion.div
               className="absolute -inset-1 bg-orange-500 rounded-full opacity-20 z-0"
               animate={{ scale: [0.85, 1.1, 0.85] }}
@@ -398,61 +371,13 @@ const Portfolio = () => {
       {/* Modal */}
       <AnimatePresence>
         {selectedItem && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-black/95 backdrop-blur-md flex items-center justify-center p-4 md:p-8 z-50"
-            onClick={() => setSelectedItem(null)}
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="glass-panel p-6 md:p-8 rounded-2xl max-w-3xl w-full shadow-2xl"
-              onClick={e => e.stopPropagation()}
-            >
-              <div className="relative aspect-video mb-6 rounded-lg overflow-hidden">
-                <img
-                  src={selectedItem.image}
-                  alt={selectedItem.title}
-                  loading="lazy"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-gray-900/50 to-transparent" />
-              </div>
-              <div className="space-y-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h3 className="title-card mb-2">{selectedItem.title}</h3>
-                    <span className="px-3 py-1 bg-orange-500/20 rounded-full text-orange-400 text-sm">
-                      {selectedItem.category}
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => setSelectedItem(null)}
-                    className="text-gray-400 hover:text-white transition-colors p-1"
-                    aria-label="Close modal"
-                  >
-                    ×
-                  </button>
-                </div>
-                <p className="subtitle-card leading-relaxed">
-                  {selectedItem.description}
-                </p>
-                <div className="pt-4">
-                  <InteractiveButton
-                    onClick={() => setSelectedItem(null)}
-                    className="button-primary px-6"
-                  >
-                    Close
-                  </InteractiveButton>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
+          <Suspense fallback={<LoadingSpinner />}>
+            <PortfolioModal
+              item={selectedItem}
+              onClose={() => setSelectedItem(null)}
+              closeButtonRef={closeButtonRef}
+            />
+          </Suspense>
         )}
       </AnimatePresence>
     </section>

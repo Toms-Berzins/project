@@ -74,6 +74,8 @@
   border-radius: 9999px; /* rounded-full */
   pointer-events: none;
   transform: translate(-50%, -50%);
+  left: var(--ripple-x, 0);
+  top: var(--ripple-y, 0);
 }
 
 /* Expanding Input */

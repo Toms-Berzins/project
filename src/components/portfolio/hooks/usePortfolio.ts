@@ -1,68 +1,48 @@
-import { useState, useEffect, useCallback } from 'react';
-import portfolioService from '../../../services/portfolioService';
+import { useState, useCallback } from 'react';
 import { PortfolioItem } from '../types';
 
-interface UsePortfolioProps {
-  itemsPerPage?: number;
-}
+const ITEMS_PER_PAGE = 6;
 
-export const usePortfolio = ({ itemsPerPage = 6 }: UsePortfolioProps = {}) => {
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+export const usePortfolio = () => {
+  const [selectedCategory, setSelectedCategory] = useState<string>('Automotive');
   const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(true);
+  const [visibleItems, setVisibleItems] = useState(ITEMS_PER_PAGE);
 
-  // Initialize loading state
-  useEffect(() => {
-    setIsLoading(false);
-  }, []);
+  // This would typically come from an API or database
+  const portfolioItems: PortfolioItem[] = [
+    // ... your portfolio items here
+  ];
 
-  // Get categories
-  const categories = portfolioService.getCategories();
+  const categories = [...new Set(portfolioItems.map(item => item.category))];
 
-  // Get paginated items
-  const { items: displayedItems, hasMore, total } = portfolioService.getPaginatedItems(
-    currentPage,
-    itemsPerPage,
-    selectedCategory
-  );
+  const filteredItems = portfolioItems.filter(item => item.category === selectedCategory);
 
-  // Reset pagination when category changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedCategory]);
+  const displayedItems = filteredItems.slice(0, visibleItems);
+  const hasMore = visibleItems < filteredItems.length;
 
-  // Handle category selection
   const handleCategoryChange = useCallback((category: string) => {
     setSelectedCategory(category);
+    setVisibleItems(ITEMS_PER_PAGE);
   }, []);
 
-  // Handle load more
   const handleLoadMore = useCallback(() => {
-    setCurrentPage(prev => prev + 1);
+    setVisibleItems(prev => prev + ITEMS_PER_PAGE);
   }, []);
 
-  // Handle item selection
   const handleItemSelect = useCallback((item: PortfolioItem) => {
     setSelectedItem(item);
   }, []);
 
-  // Handle item deselection
   const handleItemDeselect = useCallback(() => {
     setSelectedItem(null);
   }, []);
 
   return {
-    // State
     selectedCategory,
     selectedItem,
     displayedItems,
     categories,
-    isLoading,
     hasMore,
-    total,
-
-    // Actions
     handleCategoryChange,
     handleLoadMore,
     handleItemSelect,
